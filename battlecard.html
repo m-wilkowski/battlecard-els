@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Logserver – Battlecard SIEM</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f1f1f1; /* Szary tło */
+            color: #333;
+        }
+        h1, h2 {
+            color: #008000; /* Zielony ELS */
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .logo {
+            max-width: 150px; /* Dostosuj rozmiar logo */
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+            color: #008000; /* Zielony tekst */
+        }
+        .tab button:hover {
+            background-color: #FFD700; /* Żółty hover */
+        }
+        .tab button.active {
+            background-color: #008000; /* Zielony aktywny */
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            background-color: white;
+            animation: slideDown 0.5s ease-in;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #008000; /* Zielony nagłówek */
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #FFD700; /* Żółty tło dla parzystych wierszy */
+        }
+        .cta-button {
+            background-color: #008000; /* Zielony przycisk */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .cta-button:hover {
+            background-color: #006600; /* Ciemniejszy zielony */
+        }
+        .filter {
+            margin-bottom: 20px;
+        }
+        details {
+            margin: 10px 0;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #008000; /* Zielony tekst */
+        }
+
+        /* Animacje */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeToggle {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        tr.filtered {
+            animation: fadeToggle 0.3s ease-in-out;
+        }
+
+        /* Responsywność */
+        @media screen and (max-width: 768px) {
+            .container { margin: 10px; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .logo { max-width: 100px; margin-bottom: 10px; }
+            table { display: block; overflow-x: auto; }
+            .tab button { padding: 10px 12px; font-size: 14px; }
+            .tabcontent { padding: 15px; }
+        }
+        @media screen and (max-width: 480px) {
+            .header { padding: 5px; }
+            .logo { max-width: 80px; }
+            .tab button { padding: 8px 10px; font-size: 12px; }
+            .cta-button { padding: 8px 15px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Energy Logserver – Battlecard SIEM</h1>
+                <p><strong>Hasło:</strong> "Bezpieczeństwo na wyciągnięcie ręki – elastyczne, skalowalne, wspierane lokalnie."</p>
+                <p><strong>Data:</strong> Luty 2025</p>
+            </div>
+            <img src="ELS_dark.png" alt="Energy Logserver Logo" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none;">Logo ELS</div> <!-- Fallback, jeśli logo nie wczyta się -->
+        </div>
+
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Marketing')" id="defaultOpen">Marketingowy</button>
+            <button class="tablinks" onclick="openTab(event, 'Techniczny')">Techniczny</button>
+        </div>
+
+        <!-- Battlecard Marketingowy -->
+        <div id="Marketing" class="tabcontent">
+            <h2>1. Opis Rozwiązania</h2>
+            <p>Energy Logserver (ELS) to nowoczesny SIEM łączący analizę zagrożeń w czasie rzeczywistym, intuicyjne dashboardy i pełne wsparcie techniczne w języku polskim. Idealny dla firm każdej wielkości, oferujący niskie TCO, szybkie wdrożenie oraz zaawansowaną automatyzację dzięki natywnej integracji z SOAR, XDR i UEBA.</p>
+
+            <h2>2. Pozycjonowanie Rynkowe</h2>
+            <p>Dla kogo: Małe i średnie przedsiębiorstwa (MSP), sektor finansowy, przemysłowy, administracja publiczna.<br>
+            Klienci: Lokalne banki, firmy produkcyjne, dostawcy usług IT.<br>
+            Konkurencja: ELS rośnie w Polsce dzięki lokalnemu wsparciu, niższym kosztom i elastyczności.</p>
+
+            <h2>3. Kluczowe Przewagi</h2>
+            <div class="filter">
+                <label><input type="checkbox" checked onchange="filterTable('marketingTable', this)"> Pokaż wszystko</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 1)"> Licencjonowanie</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 2)"> Wsparcie</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 6)"> SOAR</label>
+            </div>
+            <table id="marketingTable">
+                <tr><th>Cecha</th><th>ELS</th><th>Splunk</th><th>QRadar</th><th>Sentinel</th><th>FortiSIEM</th><th>SecureVisio</th></tr>
+                <tr><td>Licencjonowanie</td><td>Sub/Wieczysta</td><td>Sub (GB/dzień)</td><td>Sub</td><td>Chmurowa</td><td>Sub</td><td>Sub</td></tr>
+                <tr><td>Wsparcie</td><td>Dedykowane, PL</td><td>Płatne, ENG</td><td>Płatne, PL</td><td>Microsoft ENG</td><td>Płatne, ENG</td><td>Dedykowane, PL</td></tr>
+                <tr><td>Koszt TCO</td><td>Niski</td><td>Bardzo wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Średni</td></tr>
+                <tr><td>Czas Wdrożenia</td><td>Godziny</td><td>Dni</td><td>Dni</td><td>Godziny</td><td>Dni</td><td>Godziny</td></tr>
+                <tr><td>Lokalne TI Feeds</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
+                <tr><td>Natywna Integracja SOAR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>UEBA</td><td>Tak</td><td>Płatne</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>XDR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Nie</td></tr>
+                <tr><td>Otwarty Interfejs</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
+                <tr><td>Certyfikaty</td><td>GDPR, SOC2</td><td>PCI DSS, HIPAA</td><td>FedRAMP</td><td>SOC2</td><td>NSS Labs</td><td>KNF, RODO</td></tr>
+                <tr><td>Czas Reakcji Wsparcia</td><td><1h</td><td>4h (Premium)</td><td>2h</td><td>Via Azure</td><td>4h</td><td><1h</td></tr>
+                <tr><td>Koszty Początkowe</td><td>Niski</td><td>Wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Niski</td></tr>
+            </table>
+
+            <h2>4. Kluczowe Korzyści Biznesowe</h2>
+            <p>- Funkcjonalności: Gotowe reguły, dashboardy, Empowered AI.<br>
+            - Wsparcie w PL: Dedykowani inżynierowie 24/7, reakcja <1h.<br>
+            - Koszty: Niski TCO i koszty początkowe.<br>
+            - Skalowalność: Elastyczna architektura bez limitów EPS.<br>
+            - Automatyzacja: SOAR, XDR, UEBA.<br>
+            - Elastyczność: Otwarty interfejs.</p>
+
+            <h2>5. Opinie Użytkowników</h2>
+            <p>ELS: Chwalone: szybkie wdrożenie, support PL. Krytyka: mniejsza rozpoznawalność.<br>
+            Splunk: Chwalone: analityka. Krytyka: koszty, złożoność.<br>
+            QRadar: Chwalone: AI. Krytyka: zasoby, administracja.<br>
+            Sentinel: Chwalone: Azure. Krytyka: raporty.<br>
+            FortiSIEM: Chwalone: sieć. Krytyka: wydajność.<br>
+            SecureVisio: Chwalone: support PL. Krytyka: skalowalność.</p>
+
+            <h2>6. Unikalne Funkcjonalności ELS</h2>
+            <p>- Empowered AI: Predykcja zagrożeń.<br>
+            - Network Probe: Analiza Netflow (50k Flow/s).<br>
+            - e-Doc: Dokumentacja IT.<br>
+            - Otwarty Interfejs: Elastyczność.</p>
+
+            <h2>7. Case Study</h2>
+            <p>1. Polska firma finansowa: Redukcja detekcji o 50% dzięki SOAR.<br>
+            2. Producent przemysłowy: Wykrycie anomalii z XDR.</p>
+
+            <h2>8. FAQ</h2>
+            <details>
+                <summary>Co to jest SOAR?</summary>
+                <p>SOAR to technologia automatyzująca reakcje na incydenty.</p>
+            </details>
+
+            <h2>9. Kontakt</h2>
+            <form id="contactForm">
+                <label>Imię: <input type="text" name="name" required></label><br>
+                <label>E-mail: <input type="email" name="email" required></label><br>
+                <label>Wiadomość: <textarea name="message"></textarea></label><br>
+                <button type="submit" class="cta-button">Wyślij</button>
+            </form>
+        </div>
+
+        <!-- Battlecard Techniczny -->
+        <div id="Techniczny" class="tabcontent">
+            <h2>1. Architektura Systemu</h2>
+            <p>ELS: Elasticsearch, Logstash, Kibana + GUI, wsparcie UEBA.<br>
+            Splunk: Własny silnik, wymaga dodatków.<br>
+            QRadar: Architektura z AI Watson.<br>
+            Sentinel: Chmurowy, Azure Log Analytics.<br>
+            FortiSIEM: Multi-tenant z kolektorami.<br>
+            SecureVisio: Polski SIEM, compliance.</p>
+
+            <h2>2. Wymagania i Skalowalność</h2>
+            <table>
+                <tr><th>Rozwiązanie</th><th>Wymagania Min.</th><th>Skalowalność</th><th>Ograniczenia Wydajnościowe</th></tr>
+                <tr><td>ELS</td><td>8 CPU, 16 GB RAM</td><td>Klaster Elasticsearch</td><td>Brak limitu EPS</td></tr>
+                <tr><td>Splunk</td><td>16 CPU, 32 GB RAM</td><td>Licencja GB/dzień</td><td>Limit GB/dzień</td></tr>
+                <tr><td>QRadar</td><td>16 CPU, 64 GB RAM</td><td>Dedykowane HA</td><td>Wysokie zużycie zasobów</td></tr>
+                <tr><td>Sentinel</td><td>Chmura Azure</td><td>Elastyczna</td><td>Zależna od Azure</td></tr>
+                <tr><td>FortiSIEM</td><td>12 CPU, 24 GB RAM</td><td>Multi-tenant</td><td>~50k EPS/kolektor</td></tr>
+                <tr><td>SecureVisio</td><td>8 CPU, 16 GB RAM</td><td>Klaster</td><td>~30k EPS</td></tr>
+            </table>
+
+            <h2>3. Obsługa Logów i Funkcjonalności</h2>
+            <table id="technicalTable">
+                <tr><th>Cecha</th><th>ELS</th><th>Splunk</th><th>QRadar</th><th>Sentinel</th><th>FortiSIEM</th><th>SecureVisio</th></tr>
+                <tr><td>Parsing Out-of-Box</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Dashboardy</td><td>Tak</td><td>Add-ons</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Alerting</td><td>Tak</td><td>Tak (premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>MITRE ATT&CK</td><td>Tak</td><td>Tak (premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Playbooki</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak (SOAR)</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Netflow</td><td>Tak</td><td>Tak (add-on)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Natywna Integracja SOAR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>UEBA</td><td>Tak</td><td>Tak (premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>XDR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Nie</td></tr>
+                <tr><td>Raportowanie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Płatne</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Otwarty Interfejs</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
+                <tr><td>Wieloplatformowość</td><td>Win/Linux/Chmura</td><td>Win/Linux/Chmura</td><td>Win/Linux/Chmura</td><td>Azure</td><td>Win/Linux/Chmura</td><td>Win/Linux</td></tr>
+                <tr><td>Czas Wdrożenia</td><td>1-2 dni</td><td>5-10 dni</td><td>3-7 dni</td><td>1-3 dni</td><td>3-5 dni</td><td>1-2 dni</td></tr>
+                <tr><td>Chmura Hybrydowa</td><td>Tak</td><td>Tak (złożone)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Źródła Danych</td><td>100+</td><td>500+</td><td>450+</td><td>200+</td><td>400+</td><td>150+</td></tr>
+            </table>
+
+            <h2>4. Wsparcie Techniczne</h2>
+            <table>
+                <tr><th>Rozwiązanie</th><th>Poziomy Wsparcia</th><th>Język Polski</th><th>Dostępność</th><th>Czas Reakcji</th></tr>
+                <tr><td>ELS</td><td>Dedykowane, bez limitów</td><td>Tak</td><td>24/7</td><td><1h</td></tr>
+                <tr><td>Splunk</td><td>Standard/Premium</td><td>Nie</td><td>Płatne</td><td>4h (Premium)</td></tr>
+                <tr><td>QRadar</td><td>Enterprise</td><td>Tak</td><td>Płatne</td><td>2h</td></tr>
+                <tr><td>Sentinel</td><td>Microsoft Support</td><td>Nie</td><td>Via Azure</td><td>Via Azure</td></tr>
+                <tr><td>FortiSIEM</td><td>Standard/Premium</td><td>Nie</td><td>Płatne</td><td>4h</td></tr>
+                <tr><td>SecureVisio</td><td>Dedykowane</td><td>Tak</td><td>24/7</td><td><1h</td></tr>
+            </table>
+
+            <h2>5. Opinie Użytkowników</h2>
+            <p>ELS: Chwalone: szybkie wdrożenie, support PL. Krytyka: mniejsza rozpoznawalność.<br>
+            Splunk: Chwalone: analityka. Krytyka: koszty, złożoność.<br>
+            QRadar: Chwalone: AI. Krytyka: zasoby, administracja.<br>
+            Sentinel: Chwalone: Azure. Krytyka: raporty.<br>
+            FortiSIEM: Chwalone: sieć. Krytyka: wydajność.<br>
+            SecureVisio: Chwalone: support PL. Krytyka: skalowalność.</p>
+
+            <h2>6. Integracje z Ekosystemem</h2>
+            <p>ELS: SOAR, XDR, UEBA, chmura hybrydowa.<br>
+            Splunk: Wymaga SOAR/ES App.<br>
+            QRadar: IBM X-Force, SOAR, XDR.<br>
+            Sentinel: SOAR, XDR via Defender.<br>
+            FortiSIEM: SOAR, XDR, UEBA Fortinet.<br>
+            SecureVisio: SOAR, UEBA lokalne.</p>
+
+            <h2>7. Integracje Threat Intelligence</h2>
+            <table>
+                <tr><th>Rozwiązanie</th><th>Threat Intelligence</th></tr>
+                <tr><td>ELS</td><td>MISP + Energy Feeds (150+)</td></tr>
+                <tr><td>Splunk</td><td>Paid Add-ons</td></tr>
+                <tr><td>QRadar</td><td>IBM X-Force</td></tr>
+                <tr><td>Sentinel</td><td>Microsoft TI</td></tr>
+                <tr><td>FortiSIEM</td><td>FortiGuard</td></tr>
+                <tr><td>SecureVisio</td><td>Lokalne + komercyjne</td></tr>
+            </table>
+
+            <h2>8. API i Rozszerzalność</h2>
+            <p>ELS: REST API, otwarty interfejs.<br>
+            FortiSIEM: API mniej elastyczne.<br>
+            SecureVisio: API lokalne.</p>
+
+            <h2>9. Benchmark Wydajnościowy</h2>
+            <p>ELS: 100k EPS, <1s, 8 GB RAM (10k EPS).<br>
+            Splunk: 50-100k EPS, 32 GB (50k EPS).<br>
+            QRadar: ~75k EPS, 64 GB.<br>
+            FortiSIEM: 50k EPS, 24 GB.<br>
+            SecureVisio: 30k EPS, 16 GB.</p>
+
+            <h2>10. Kontakt</h2>
+            <form id="contactFormTech">
+                <label>Imię: <input type="text" name="name" required></label><br>
+                <label>E-mail: <input type="email" name="email" required></label><br>
+                <label>Wiadomość: <textarea name="message"></textarea></label><br>
+                <button type="submit" class="cta-button">Wyślij</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        function filterTable(tableId, checkbox, rowIndex = -1) {
+            var table = document.getElementById(tableId);
+            var rows = table.getElementsByTagName("tr");
+            var allChecked = document.querySelector('input[type="checkbox"]:checked') === null;
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                if (rowIndex === -1 || i === rowIndex) {
+                    if (checkbox.checked || allChecked) {
+                        row.classList.add('filtered');
+                        row.style.display = "";
+                        setTimeout(() => row.classList.remove('filtered'), 300); // Usuń klasę po animacji
+                    } else {
+                        row.classList.add('filtered');
+                        row.style.display = "none";
+                        setTimeout(() => row.classList.remove('filtered'), 300); // Usuń klasę po animacji
+                    }
+                }
+            }
+        }
+
+        document.getElementById("contactForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            alert("Wiadomość wysłana! (kontakt@energylogserver.com)");
+        });
+        document.getElementById("contactFormTech").addEventListener("submit", function(e) {
+            e.preventDefault();
+            alert("Wiadomość wysłana! (kontakt@energylogserver.com)");
+        });
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Energy Logserver – Battlecard SIEM", 10, 10);
+            doc.save("battlecard.pdf");
+        }
+
+        document.getElementById("defaultOpen").click();
+    </script>
+</body>
+</html>
