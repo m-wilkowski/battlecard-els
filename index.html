@@ -15,7 +15,7 @@
         h1, h2 {
             color: #008000;
             text-align: center;
-            margin: 20px 0; /* Increased spacing */
+            margin: 20px 0;
         }
         .container {
             max-width: 1200px;
@@ -52,7 +52,7 @@
             animation: fadeIn 0.5s ease-in;
         }
         .tab button {
-            background-color: #006400; /* Darker green for non-active */
+            background-color: #006400;
             border: none;
             outline: none;
             cursor: pointer;
@@ -67,23 +67,26 @@
             background-color: #008000;
         }
         .tab button.active {
-            background-color: #00cc00; /* Brighter green for active */
+            background-color: #00cc00;
             box-shadow: 0 0 8px rgba(0, 204, 0, 0.5);
         }
         .tabcontent {
-            display: none;
             padding: 20px;
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            animation: fadeInTab 0.5s ease-in; /* Smoother tab transition */
+            animation: fadeInTab 0.5s ease-in;
+            border: 1px solid transparent; /* Gradient border */
+            background-image: linear-gradient(white, white), linear-gradient(to right, #00cc00, #008000);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            border-radius: 8px; /* Rounded corners */
-            overflow: hidden; /* Ensure rounded corners apply */
+            border-radius: 8px;
+            overflow: hidden;
         }
         th, td {
             border: 1px solid #ddd;
@@ -92,23 +95,23 @@
             transition: background-color 0.2s;
         }
         th {
-            background-color: #008000;
+            background: linear-gradient(to bottom, #008000, #006400); /* Gradient header */
             color: white;
         }
         tr:nth-child(even) {
-            background-color: #fff9c4; /* Less vibrant yellow */
+            background-color: #fff9c4;
         }
         tr:hover {
-            background-color: #e0f7e0; /* Subtle green hover effect */
+            background-color: #e0f7e0;
         }
         td:hover {
-            box-shadow: inset 0 0 5px rgba(0, 128, 0, 0.2); /* Soft shadow on cell hover */
+            box-shadow: inset 0 0 5px rgba(0, 128, 0, 0.2);
         }
         .cta-button {
             display: block;
             width: fit-content;
             margin: 20px auto;
-            background: linear-gradient(to bottom, #00cc00, #008000); /* Gradient button */
+            background: linear-gradient(to bottom, #00cc00, #008000);
             color: white;
             padding: 10px 20px;
             border: none;
@@ -119,7 +122,7 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .cta-button:hover {
-            transform: scale(1.05);
+            transform: scale(1.05) rotate(2deg); /* Slight rotation */
             box-shadow: 0 5px 15px rgba(0, 128, 0, 0.3);
         }
         .filter, .vendor-select {
@@ -141,9 +144,24 @@
             color: #008000;
             text-decoration: none;
             font-weight: bold;
+            position: relative;
+            transition: color 0.3s;
+        }
+        .language-switch a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #00cc00;
+            transition: width 0.3s;
+        }
+        .language-switch a:hover::after {
+            width: 100%;
         }
         .language-switch a:hover {
-            color: #fff9c4;
+            color: #00cc00;
         }
         .language-switch a.active {
             color: #006400;
@@ -155,6 +173,12 @@
         }
         a:hover {
             text-decoration: underline;
+        }
+        .section-divider {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #00cc00, transparent);
+            margin: 20px 0;
         }
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -191,8 +215,8 @@
             .cta-button { padding: 8px 15px; font-size: 14px; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
 </head>
 <body>
     <div class="container">
@@ -219,10 +243,12 @@
             <h2 data-pl="1. Opis Rozwiązania" data-en="1. Solution Overview"></h2>
             <p data-pl="EnergyLogserver to nowoczesny SIEM łączący analizę zagrożeń w czasie rzeczywistym, intuicyjne dashboardy i pełne wsparcie techniczne w języku polskim. Idealny dla firm każdej wielkości, oferujący niskie TCO, szybkie wdrożenie oraz zaawansowaną automatyzację dzięki natywnej integracji z SOAR, XDR i UEBA." 
                data-en="EnergyLogserver is a modern SIEM combining real-time threat analysis, intuitive dashboards, and full technical support in Polish. Ideal for companies of all sizes, offering low TCO, rapid deployment, and advanced automation through native integration with SOAR, XDR, and UEBA."></p>
+            <hr class="section-divider">
 
             <h2 data-pl="2. Pozycjonowanie Rynkowe" data-en="2. Market Positioning"></h2>
             <p data-pl="Dla kogo: Małe i średnie przedsiębiorstwa (MSP), sektor finansowy, przemysłowy, administracja publiczna.<br>Klienci: Lokalne banki, firmy produkcyjne, dostawcy usług IT.<br>Konkurencja: EnergyLogserver rośnie w Polsce dzięki lokalnemu wsparciu, niższym kosztom i elastyczności." 
                data-en="Target Audience: Small and medium enterprises (SMEs), financial sector, industrial sector, public administration.<br>Clients: Local banks, manufacturing companies, IT service providers.<br>Competition: EnergyLogserver is growing in Poland due to local support, lower costs, and flexibility."></p>
+            <hr class="section-divider">
 
             <h2 data-pl="3. Kluczowe Przewagi" data-en="3. Key Advantages"></h2>
             <div class="vendor-select">
@@ -265,6 +291,7 @@
                 <tr><td data-pl="Czas Reakcji Wsparcia" data-en="Support Response Time">Czas Reakcji Wsparcia</td><td><1h</td><td>30 min (Premium) (<a href="https://www.splunk.com/en_us/customer-success/support-programs.html">źródło</a>)</td><td>2h</td><td>Via Azure</td><td>4h</td><td><1h</td></tr>
                 <tr><td data-pl="Koszty Początkowe" data-en="Initial Costs">Koszty Początkowe</td><td>Niski</td><td>Wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Niski</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="4. Kluczowe Korzyści Biznesowe" data-en="4. Key Business Benefits"></h2>
             <div class="vendor-select">
@@ -295,6 +322,7 @@
                 <tr><td data-pl="Automatyzacja" data-en="Automation">Automatyzacja</td><td>SOAR, XDR, UEBA</td><td>SOAR (natywna integracja)</td><td>SOAR, XDR, UEBA</td><td>SOAR, XDR via Defender</td><td>SOAR, XDR, UEBA</td><td>SOAR, UEBA</td></tr>
                 <tr><td data-pl="Elastyczność" data-en="Flexibility">Elastyczność</td><td data-pl="Otwarty interfejs" data-en="Open interface">Otwarty interfejs</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Otwarty interfejs</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="5. Opinie Użytkowników" data-en="5. User Reviews"></h2>
             <div class="vendor-select">
@@ -321,6 +349,7 @@
                 <tr><td>FortiSIEM</td><td>Sieć</td><td>Wydajność</td></tr>
                 <tr><td>SecureVisio</td><td>Support PL</td><td>Skalowalność</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="6. Unikalne Funkcjonalności" data-en="6. Unique Functionalities"></h2>
             <div class="vendor-select">
@@ -349,6 +378,7 @@
                 <tr><td data-pl="Dokumentacja IT" data-en="IT Documentation">Dokumentacja IT</td><td>e-Doc</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
                 <tr><td data-pl="Elastyczność" data-en="Flexibility">Elastyczność</td><td>Otwarty Interfejs</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Elastyczność</td></tr>
             </table>
+            <hr class="section-divider">
 
             <button class="cta-button" onclick="exportToPDF('Marketing')" data-pl="Eksport do PDF" data-en="Export to PDF">Eksport do PDF</button>
         </div>
@@ -379,6 +409,7 @@
                 <tr><td>FortiSIEM</td><td>Multi-tenant z kolektorami</td></tr>
                 <tr><td>SecureVisio</td><td>Polski SIEM, compliance</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="2. Kluczowe Przewagi" data-en="2. Key Advantages"></h2>
             <div class="vendor-select">
@@ -423,6 +454,7 @@
                 <tr><td data-pl="Chmura Hybrydowa" data-en="Hybrid Cloud">Chmura Hybrydowa</td><td>Tak</td><td>Tak (złożone)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
                 <tr><td data-pl="Źródła Danych" data-en="Data Sources">Źródła Danych</td><td>100+</td><td>500+</td><td>450+</td><td>200+</td><td>400+</td><td>150+</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="3. Wymagania i Skalowalność" data-en="3. Requirements and Scalability"></h2>
             <div class="vendor-select">
@@ -450,6 +482,7 @@
                 <tr><td>FortiSIEM</td><td>12 CPU, 24 GB RAM</td><td>Multi-tenant</td><td>~50k EPS/kolektor</td></tr>
                 <tr><td>SecureVisio</td><td>8 CPU, 16 GB RAM</td><td>Klaster</td><td>~30k EPS</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="4. Integracje z Ekosystemem" data-en="4. Ecosystem Integrations"></h2>
             <div class="vendor-select">
@@ -475,6 +508,7 @@
                 <tr><td>FortiSIEM</td><td>SOAR, XDR, UEBA Fortinet</td></tr>
                 <tr><td>SecureVisio</td><td>SOAR, UEBA lokalne</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="5. Integracje Threat Intelligence" data-en="5. Threat Intelligence Integrations"></h2>
             <div class="vendor-select">
@@ -500,6 +534,7 @@
                 <tr><td>FortiSIEM</td><td>FortiGuard</td></tr>
                 <tr><td>SecureVisio</td><td>Lokalne + komercyjne</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="6. API i Rozszerzalność" data-en="6. API and Extensibility"></h2>
             <div class="vendor-select">
@@ -525,6 +560,7 @@
                 <tr><td>FortiSIEM</td><td>API mniej elastyczne</td></tr>
                 <tr><td>SecureVisio</td><td>API lokalne</td></tr>
             </table>
+            <hr class="section-divider">
 
             <h2 data-pl="7. Benchmark Wydajnościowy" data-en="7. Performance Benchmark"></h2>
             <div class="vendor-select">
@@ -552,6 +588,7 @@
                 <tr><td>FortiSIEM</td><td>50k</td><td><2s</td><td>24 GB</td></tr>
                 <tr><td>SecureVisio</td><td>30k</td><td><2s</td><td>16 GB</td></tr>
             </table>
+            <hr class="section-divider">
 
             <button class="cta-button" onclick="exportToPDF('Techniczny')" data-pl="Eksport do PDF" data-en="Export to PDF">Eksport do PDF</button>
         </div>
@@ -658,135 +695,137 @@
             }
         }
 
-        async function exportToPDF(tabName) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
+        function exportToPDF(tabName) {
             const tab = document.getElementById(tabName);
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const margin = 10;
-            let yOffset = margin;
+            const docDefinition = {
+                pageSize: 'A4',
+                pageMargins: [20, 20, 20, 20],
+                content: [],
+                styles: {
+                    header: {
+                        fontSize: 16,
+                        bold: true,
+                        margin: [0, 0, 0, 10],
+                        color: '#008000'
+                    },
+                    subheader: {
+                        fontSize: 14,
+                        bold: true,
+                        margin: [0, 10, 0, 5],
+                        color: '#008000'
+                    },
+                    text: {
+                        fontSize: 12,
+                        margin: [0, 0, 0, 10]
+                    },
+                    table: {
+                        fontSize: 10,
+                        margin: [0, 5, 0, 15]
+                    },
+                    tableHeader: {
+                        bold: true,
+                        fillColor: '#008000',
+                        color: 'white'
+                    },
+                    tableRowEven: {
+                        fillColor: '#fff9c4'
+                    }
+                },
+                defaultStyle: {
+                    font: 'Helvetica' // Fallback font
+                }
+            };
 
             // Add title
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(16);
-            doc.text(document.getElementById('header-title').textContent, margin, yOffset);
-            yOffset += 10;
+            docDefinition.content.push({
+                text: document.getElementById('header-title').textContent,
+                style: 'header',
+                alignment: 'center'
+            });
 
             // Process sections
             const sections = tab.querySelectorAll('h2, p, .vendor-select, .filter, table');
-            for (let section of sections) {
-                const tempContainer = document.createElement('div');
-                tempContainer.style.padding = '5px';
-                tempContainer.style.backgroundColor = '#fff';
-                tempContainer.style.width = `${pageWidth - 2 * margin}mm`;
-                tempContainer.style.fontFamily = 'Montserrat, sans-serif';
-                tempContainer.style.boxSizing = 'border-box';
-
-                if (section.tagName === 'H2' || section.tagName === 'P' || section.classList.contains('vendor-select') || section.classList.contains('filter')) {
-                    const clone = section.cloneNode(true);
-                    tempContainer.appendChild(clone);
+            sections.forEach(section => {
+                if (section.tagName === 'H2') {
+                    docDefinition.content.push({
+                        text: section.textContent,
+                        style: 'subheader'
+                    });
+                } else if (section.tagName === 'P') {
+                    docDefinition.content.push({
+                        text: section.textContent,
+                        style: 'text'
+                    });
+                } else if (section.classList.contains('vendor-select')) {
+                    const select = section.querySelector('select');
+                    docDefinition.content.push({
+                        text: `${section.querySelector('label').textContent} ${select.options[select.selectedIndex].text}`,
+                        style: 'text'
+                    });
+                } else if (section.classList.contains('filter')) {
+                    const checkboxes = section.querySelectorAll('input[type="checkbox"]:checked');
+                    const labels = Array.from(checkboxes).map(cb => cb.nextElementSibling.textContent).join(', ');
+                    docDefinition.content.push({
+                        text: `Filtry: ${labels || 'Brak'}`,
+                        style: 'text'
+                    });
                 } else if (section.tagName === 'TABLE') {
                     const tableId = section.id;
                     const vendorSelect = document.getElementById('vendor' + tableId.replace('Table', ''));
                     const selectedVendor = vendorSelect ? vendorSelect.value : 'all';
-                    const tempTable = section.cloneNode(true);
 
-                    // Apply vendor filter
-                    if (selectedVendor !== 'all') {
-                        const headers = tempTable.getElementsByTagName('th');
-                        const rows = tempTable.getElementsByTagName('tr');
-                        let vendorIndex = -1;
-                        for (let i = 0; i < headers.length; i++) {
-                            if (headers[i].textContent === selectedVendor) {
-                                vendorIndex = i;
-                                break;
-                            }
+                    // Extract table data
+                    const headers = section.querySelectorAll('th');
+                    const rows = section.querySelectorAll('tr');
+                    const tableData = [];
+                    const headerRow = [];
+
+                    // Headers
+                    Array.from(headers).forEach((header, index) => {
+                        if (selectedVendor === 'all' || index === 0 || index === 1 || header.textContent === selectedVendor) {
+                            headerRow.push({
+                                text: header.textContent,
+                                style: 'tableHeader'
+                            });
                         }
-                        for (let j = 0; j < headers.length; j++) {
-                            headers[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                    });
+                    tableData.push(headerRow);
+
+                    // Rows
+                    Array.from(rows).slice(1).forEach(row => {
+                        if (row.style.display !== 'none') { // Respect filtered rows
+                            const cells = row.querySelectorAll('td');
+                            const rowData = [];
+                            Array.from(cells).forEach((cell, index) => {
+                                if (selectedVendor === 'all' || index === 0 || index === 1 || headers[index].textContent === selectedVendor) {
+                                    rowData.push(cell.textContent);
+                                }
+                            });
+                            tableData.push(rowData);
                         }
-                        for (let i = 1; i < rows.length; i++) {
-                            const cells = rows[i].getElementsByTagName('td');
-                            for (let j = 0; j < cells.length; j++) {
-                                cells[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
-                            }
-                        }
-                    }
-
-                    // Apply styles to ensure rendering
-                    tempTable.style.width = '100%';
-                    tempTable.style.borderCollapse = 'collapse';
-                    const ths = tempTable.getElementsByTagName('th');
-                    const tds = tempTable.getElementsByTagName('td');
-                    for (let th of ths) {
-                        th.style.border = '1px solid #ddd';
-                        th.style.padding = '10px';
-                        th.style.textAlign = 'center';
-                        th.style.backgroundColor = '#008000';
-                        th.style.color = 'white';
-                    }
-                    for (let td of tds) {
-                        td.style.border = '1px solid #ddd';
-                        td.style.padding = '10px';
-                        td.style.textAlign = 'center';
-                    }
-                    const trs = tempTable.getElementsByTagName('tr');
-                    for (let i = 0; i < trs.length; i++) {
-                        if (i % 2 === 1) {
-                            trs[i].style.backgroundColor = '#fff9c4';
-                        }
-                    }
-
-                    tempContainer.appendChild(tempTable);
-                }
-
-                // Append to body
-                tempContainer.style.position = 'absolute';
-                tempContainer.style.left = '0';
-                tempContainer.style.top = '0';
-                tempContainer.style.zIndex = '-1';
-                document.body.appendChild(tempContainer);
-
-                // Wait for rendering
-                await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay
-
-                try {
-                    const canvas = await html2canvas(tempContainer, {
-                        scale: 2,
-                        useCORS: true,
-                        backgroundColor: '#ffffff',
-                        logging: true,
-                        width: tempContainer.offsetWidth,
-                        height: tempContainer.offsetHeight,
-                        windowWidth: document.documentElement.offsetWidth,
-                        windowHeight: document.documentElement.offsetHeight
                     });
 
-                    const imgData = canvas.toDataURL('image/png', 1.0);
-                    const imgProps = doc.getImageProperties(imgData);
-                    const imgWidth = pageWidth - 2 * margin;
-                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-                    if (yOffset + imgHeight + margin > pageHeight) {
-                        doc.addPage();
-                        yOffset = margin;
-                    }
-
-                    doc.addImage(imgData, 'PNG', margin, yOffset, imgWidth, imgHeight);
-                    yOffset += imgHeight + 5;
-                } catch (error) {
-                    console.error('Failed to render section:', section, error);
+                    // Add table to PDF
+                    docDefinition.content.push({
+                        table: {
+                            headerRows: 1,
+                            widths: headerRow.map(() => '*'),
+                            body: tableData
+                        },
+                        layout: {
+                            fillColor: function (rowIndex) {
+                                return rowIndex % 2 === 1 ? '#fff9c4' : null;
+                            },
+                            hLineColor: '#ddd',
+                            vLineColor: '#ddd'
+                        },
+                        style: 'table'
+                    });
                 }
+            });
 
-                document.body.removeChild(tempContainer);
-            }
-
-            doc.save('EnergyLogserver_Battlecard.pdf');
+            // Generate PDF
+            pdfMake.createPdf(docDefinition).download('EnergyLogserver_Battlecard.pdf');
         }
 
         document.getElementById("defaultOpen").click();
