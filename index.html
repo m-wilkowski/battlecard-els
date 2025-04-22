@@ -51,7 +51,7 @@
             animation: fadeIn 0.5s ease-in;
         }
         .tab button {
-            background-color: #008000; /* Green for both buttons */
+            background-color: #008000;
             border: none;
             outline: none;
             cursor: pointer;
@@ -94,7 +94,7 @@
             color: white;
         }
         tr:nth-child(even) {
-            background-color: #fff9c4; /* Less vibrant yellow */
+            background-color: #fff9c4;
         }
         .cta-button {
             display: block;
@@ -123,10 +123,6 @@
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #ccc;
-        }
-        .highlight {
-            color: #008000;
-            font-weight: bold;
         }
         .language-switch {
             text-align: center;
@@ -342,7 +338,7 @@
                 <tr><td data-pl="Elastyczność" data-en="Flexibility">Elastyczność</td><td>Otwarty Interfejs</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Elastyczność</td></tr>
             </table>
 
-            <button class="cta-button" onclick="exportToPDF()" data-pl="Eksport do PDF" data-en="Export to PDF">Eksport do PDF</button>
+            <button class="cta-button" onclick="exportToPDF('Marketing')" data-pl="Eksport do PDF" data-en="Export to PDF">Eksport do PDF</button>
         </div>
 
         <!-- Battlecard Techniczny -->
@@ -545,7 +541,7 @@
                 <tr><td>SecureVisio</td><td>30k</td><td><2s</td><td>16 GB</td></tr>
             </table>
 
-            <button class="cta-button" onclick="exportToPDF()" data-pl="Eksport do PDF" data-en="Export to PDF">Eksport do PDF</button>
+            <button class="cta-button" onclick="exportToPDF('Techniczny')" data-pl="Eksport do PDF" data-en="Export to PDF">Eksport do PDF</button>
         </div>
     </div>
 
@@ -650,47 +646,93 @@
             }
         }
 
-        async function exportToPDF() {
+        async function exportToPDF(tabName) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const tabContents = document.getElementsByClassName("tabcontent");
-            const tabs = ["Marketing", "Techniczny"];
-            let pageWidth = doc.internal.pageSize.getWidth();
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+            const tab = document.getElementById(tabName);
+            const tables = tab.querySelectorAll('table');
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 10;
+            let yOffset = 10;
 
-            let currentTab = document.querySelector('.tabcontent[style*="display: block"]').id;
+            // Add title
+            doc.setFont('Montserrat', 'bold');
+            doc.setFontSize(16);
+            doc.text(document.getElementById('header-title').textContent, margin, yOffset);
+            yOffset += 10;
 
-            for (let i = 0; i < tabs.length; i++) {
-                let tab = tabs[i];
-                let element = document.getElementById(tab);
+            for (let table of tables) {
+                const tableId = table.id;
+                const vendorSelect = document.getElementById('vendor' + tableId.replace('Table', ''));
+                const selectedVendor = vendorSelect ? vendorSelect.value : 'all';
+                const sectionTitle = table.previousElementSibling?.textContent || '';
 
-                for (let j = 0; j < tabContents.length; j++) {
-                    tabContents[j].style.display = "none";
+                // Add section title
+                doc.setFontSize(12);
+                doc.text(sectionTitle, margin, yOffset);
+                yOffset += 8;
+
+                // Clone table to manipulate for export
+                const tempTable = table.cloneNode(true);
+                if (selectedVendor !== 'all') {
+                    const headers = tempTable.getElementsByTagName('th');
+                    const rows = tempTable.getElementsByTagName('tr');
+                    let vendorIndex = -1;
+                    for (let i = 0; i < headers.length; i++) {
+                        if (headers[i].textContent === selectedVendor) {
+                            vendorIndex = i;
+                            break;
+                        }
+                    }
+                    for (let j = 0; j < headers.length; j++) {
+                        headers[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                    }
+                    for (let i = 1; i < rows.length; i++) {
+                        const cells = rows[i].getElementsByTagName('td');
+                        for (let j = 0; j < cells.length; j++) {
+                            cells[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                        }
+                    }
                 }
-                element.style.display = "block";
 
-                window.scrollTo(0, 0);
+                // Create a temporary container for the table
+                const tempContainer = document.createElement('div');
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.top = '-9999px';
+                tempContainer.appendChild(tempTable);
+                document.body.appendChild(tempContainer);
 
-                const canvas = await html2canvas(element, {
-                    scale: 3,
+                // Capture table as canvas
+                const canvas = await html2canvas(tempTable, {
+                    scale: 4, // Higher resolution for clarity
                     useCORS: true,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: tempTable.offsetWidth,
+                    height: tempTable.offsetHeight
                 });
 
                 const imgData = canvas.toDataURL('image/jpeg', 0.95);
                 const imgProps = doc.getImageProperties(imgData);
-                const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+                const imgWidth = pageWidth - 2 * margin;
+                const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-                if (i > 0) {
+                // Check if new page is needed
+                if (yOffset + imgHeight + margin > doc.internal.pageSize.getHeight()) {
                     doc.addPage();
+                    yOffset = margin;
                 }
 
-                doc.addImage(imgData, 'JPEG', 0, 0, pageWidth, pdfHeight);
-            }
+                doc.addImage(imgData, 'JPEG', margin, yOffset, imgWidth, imgHeight);
+                yOffset += imgHeight + 10;
 
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].style.display = "none";
+                // Clean up
+                document.body.removeChild(tempContainer);
             }
-            document.getElementById(currentTab).style.display = "block";
 
             doc.save('EnergyLogserver_Battlecard.pdf');
         }
