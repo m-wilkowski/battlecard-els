@@ -655,26 +655,31 @@
             });
             const tab = document.getElementById(tabName);
             const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
             const margin = 10;
             let yOffset = margin;
 
             // Add title
-            doc.setFont('helvetica', 'bold'); // Use Helvetica as a fallback
+            doc.setFont('helvetica', 'bold');
             doc.setFontSize(16);
             doc.text(document.getElementById('header-title').textContent, margin, yOffset);
             yOffset += 10;
 
-            // Process sections (h2, p, tables)
-            const sections = tab.querySelectorAll('h2, p, table');
+            // Process sections (h2, p, vendor-select, filter, table)
+            const sections = tab.querySelectorAll('h2, p, .vendor-select, .filter, table');
             for (let section of sections) {
+                // Create a temporary container
                 const tempContainer = document.createElement('div');
                 tempContainer.style.padding = '5px';
                 tempContainer.style.backgroundColor = '#fff';
                 tempContainer.style.width = `${pageWidth - 2 * margin}mm`;
+                tempContainer.style.fontFamily = 'Montserrat, sans-serif';
 
-                if (section.tagName === 'H2' || section.tagName === 'P') {
-                    tempContainer.innerHTML = section.outerHTML;
+                if (section.tagName === 'H2' || section.tagName === 'P' || section.classList.contains('vendor-select') || section.classList.contains('filter')) {
+                    // Clone headers, paragraphs, vendor-select, and filter
+                    tempContainer.appendChild(section.cloneNode(true));
                 } else if (section.tagName === 'TABLE') {
+                    // Handle tables with vendor filtering
                     const tableId = section.id;
                     const vendorSelect = document.getElementById('vendor' + tableId.replace('Table', ''));
                     const selectedVendor = vendorSelect ? vendorSelect.value : 'all';
@@ -705,39 +710,49 @@
                     tempContainer.appendChild(tempTable);
                 }
 
-                // Append to body temporarily
+                // Append to body (visible for rendering)
                 tempContainer.style.position = 'absolute';
-                tempContainer.style.top = '-9999px';
+                tempContainer.style.left = '0';
+                tempContainer.style.top = '0';
+                tempContainer.style.zIndex = '-1';
                 document.body.appendChild(tempContainer);
 
-                // Capture as canvas
-                const canvas = await html2canvas(tempContainer, {
-                    scale: 3, // High resolution
-                    useCORS: true,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    width: tempContainer.offsetWidth,
-                    height: tempContainer.offsetHeight
-                });
+                // Wait for rendering
+                await new Promise(resolve => setTimeout(resolve, 100));
 
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                const imgProps = doc.getImageProperties(imgData);
-                const imgWidth = pageWidth - 2 * margin;
-                const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+                try {
+                    // Capture as canvas
+                    const canvas = await html2canvas(tempContainer, {
+                        scale: 2, // Balanced resolution
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        logging: true,
+                        width: tempContainer.offsetWidth,
+                        height: tempContainer.offsetHeight
+                    });
 
-                // Check for page break
-                if (yOffset + imgHeight + margin > doc.internal.pageSize.getHeight()) {
-                    doc.addPage();
-                    yOffset = margin;
+                    const imgData = canvas.toDataURL('image/png', 1.0); // Use PNG for better quality
+                    const imgProps = doc.getImageProperties(imgData);
+                    const imgWidth = pageWidth - 2 * margin;
+                    const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+                    // Check for page break
+                    if (yOffset + imgHeight + margin > pageHeight) {
+                        doc.addPage();
+                        yOffset = margin;
+                    }
+
+                    doc.addImage(imgData, 'PNG', margin, yOffset, imgWidth, imgHeight);
+                    yOffset += imgHeight + 5;
+                } catch (error) {
+                    console.error('Failed to render section:', error);
                 }
-
-                doc.addImage(imgData, 'JPEG', margin, yOffset, imgWidth, imgHeight);
-                yOffset += imgHeight + 5;
 
                 // Clean up
                 document.body.removeChild(tempContainer);
             }
 
+            // Save PDF
             doc.save('EnergyLogserver_Battlecard.pdf');
         }
 
