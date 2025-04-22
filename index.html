@@ -32,6 +32,10 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             animation: fadeIn 0.5s ease-in;
         }
+        .header-title {
+            flex: 1;
+            text-align: center;
+        }
         .logo {
             max-width: 150px;
             transition: transform 0.3s ease;
@@ -110,7 +114,7 @@
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0, 128, 0, 0.3);
         }
-        .filter, .search, .vendor-select {
+        .filter, .vendor-select {
             margin-bottom: 20px;
             text-align: center;
         }
@@ -165,7 +169,8 @@
         }
         @media screen and (max-width: 768px) {
             .container { margin: 10px; }
-            .header { flex-direction: column; align-items: flex-start; }
+            .header { flex-direction: column; align-items: center; }
+            .header-title { margin: 10px 0; }
             .logo { max-width: 100px; margin-bottom: 10px; }
             table { display: block; overflow-x: auto; }
             .tab button { padding: 10px 12px; font-size: 14px; }
@@ -184,7 +189,9 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 id="header-title">EnergyLogserver – Battlecard SIEM</h1>
+            <div class="header-title">
+                <h1 id="header-title">EnergyLogserver – Battlecard SIEM</h1>
+            </div>
             <img src="ELS_dark.png" alt="EnergyLogserver Logo" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
             <div style="display:none;">Logo EnergyLogserver</div>
         </div>
@@ -227,9 +234,6 @@
                 <label><input type="checkbox" onchange="filterTable('marketingTable', this, 2)" data-pl="Wsparcie" data-en="Support"> <span>Wsparcie</span></label>
                 <label><input type="checkbox" onchange="filterTable('marketingTable', this, 6)" data-pl="SOAR" data-en="SOAR"> <span>SOAR</span></label>
             </div>
-            <div class="search">
-                <input type="text" id="marketingSearch" placeholder="Wyszukaj..." data-en-placeholder="Search..." onkeyup="searchTable('marketingTable', this.value)">
-            </div>
             <table id="marketingTable">
                 <tr>
                     <th data-pl="Cecha" data-en="Feature"></th>
@@ -245,12 +249,12 @@
                 <tr><td data-pl="Koszt TCO" data-en="TCO Cost">Koszt TCO</td><td>Niski</td><td>Bardzo wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Średni</td></tr>
                 <tr><td data-pl="Czas Wdrożenia" data-en="Deployment Time">Czas Wdrożenia</td><td>Godziny</td><td>Dni</td><td>Dni</td><td>Godziny</td><td>Dni</td><td>Godziny</td></tr>
                 <tr><td data-pl="Lokalne TI Feeds" data-en="Local TI Feeds">Lokalne TI Feeds</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
-                <tr><td data-pl="Natywna Integracja SOAR" data-en="Native SOAR Integration">Natywna Integracja SOAR</td><td>Tak</td><td><span class="highlight">Tak</span></td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-pl="Natywna Integracja SOAR" data-en="Native SOAR Integration">Natywna Integracja SOAR</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
                 <tr><td data-pl="UEBA" data-en="UEBA">UEBA</td><td>Tak</td><td>Płatne</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
                 <tr><td data-pl="XDR" data-en="XDR">XDR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Nie</td></tr>
                 <tr><td data-pl="Otwarty Interfejs" data-en="Open Interface">Otwarty Interfejs</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
-                <tr><td data-pl="Certyfikaty" data-en="Certifications">Certyfikaty</td><td>GDPR, SOC2</td><td><span class="highlight">GDPR, SOC2, PCI DSS, HIPAA, FedRAMP</span> (<a href="https://www.splunk.com/en_us/about-splunk/splunk-data-security-and-privacy/compliance-at-splunk.html#global">źródło</a>, <a href="https://splunkbase.splunk.com/app/4281">app</a>)</td><td>FedRAMP</td><td>SOC2</td><td>NSS Labs</td><td>KNF, RODO</td></tr>
-                <tr><td data-pl="Czas Reakcji Wsparcia" data-en="Support Response Time">Czas Reakcji Wsparcia</td><td><1h</td><td><span class="highlight">30 min (Premium)</span> (<a href="https://www.splunk.com/en_us/customer-success/support-programs.html">źródło</a>)</td><td>2h</td><td>Via Azure</td><td>4h</td><td><1h</td></tr>
+                <tr><td data-pl="Certyfikaty" data-en="Certifications">Certyfikaty</td><td>GDPR, SOC2</td><td>GDPR, SOC2, PCI DSS, HIPAA, FedRAMP (<a href="https://www.splunk.com/en_us/about-splunk/splunk-data-security-and-privacy/compliance-at-splunk.html#global">źródło</a>, <a href="https://splunkbase.splunk.com/app/4281">app</a>)</td><td>FedRAMP</td><td>SOC2</td><td>NSS Labs</td><td>KNF, RODO</td></tr>
+                <tr><td data-pl="Czas Reakcji Wsparcia" data-en="Support Response Time">Czas Reakcji Wsparcia</td><td><1h</td><td>30 min (Premium) (<a href="https://www.splunk.com/en_us/customer-success/support-programs.html">źródło</a>)</td><td>2h</td><td>Via Azure</td><td>4h</td><td><1h</td></tr>
                 <tr><td data-pl="Koszty Początkowe" data-en="Initial Costs">Koszty Początkowe</td><td>Niski</td><td>Wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Niski</td></tr>
             </table>
 
@@ -280,7 +284,7 @@
                 <tr><td data-pl="Wsparcie w PL" data-en="Support in PL">Wsparcie w PL</td><td data-pl="Dedykowane, 24/7, <1h" data-en="Dedicated, 24/7, <1h">Dedykowane, 24/7, <1h</td><td>Brak</td><td>Płatne, 2h</td><td>Brak</td><td>Brak</td><td>Dedykowane, 24/7, <1h</td></tr>
                 <tr><td data-pl="Koszty" data-en="Costs">Koszty</td><td data-pl="Niski TCO, niskie początkowe" data-en="Low TCO, low initial">Niski TCO, niskie początkowe</td><td>Wysokie TCO, wysokie początkowe</td><td>Wysokie TCO, wysokie początkowe</td><td>Średnie TCO, średnie początkowe</td><td>Średnie TCO, średnie początkowe</td><td>Średnie TCO, niskie początkowe</td></tr>
                 <tr><td data-pl="Skalowalność" data-en="Scalability">Skalowalność</td><td data-pl="Elastyczna, bez limitów EPS" data-en="Flexible, no EPS limits">Elastyczna, bez limitów EPS</td><td>Ograniczenia GB/dzień</td><td>Wysokie zasoby</td><td>Elastyczna w Azure</td><td>Multi-tenant, ~50k EPS</td><td>Klaster, ~30k EPS</td></tr>
-                <tr><td data-pl="Automatyzacja" data-en="Automation">Automatyzacja</td><td>SOAR, XDR, UEBA</td><td><span class="highlight">SOAR (natywna integracja)</span></td><td>SOAR, XDR, UEBA</td><td>SOAR, XDR via Defender</td><td>SOAR, XDR, UEBA</td><td>SOAR, UEBA</td></tr>
+                <tr><td data-pl="Automatyzacja" data-en="Automation">Automatyzacja</td><td>SOAR, XDR, UEBA</td><td>SOAR (natywna integracja)</td><td>SOAR, XDR, UEBA</td><td>SOAR, XDR via Defender</td><td>SOAR, XDR, UEBA</td><td>SOAR, UEBA</td></tr>
                 <tr><td data-pl="Elastyczność" data-en="Flexibility">Elastyczność</td><td data-pl="Otwarty interfejs" data-en="Open interface">Otwarty interfejs</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Otwarty interfejs</td></tr>
             </table>
 
@@ -332,8 +336,8 @@
                     <th>FortiSIEM</th>
                     <th>SecureVisio</th>
                 </tr>
-                <tr><td data-pl="Predykcja zagrożeń" data-en="Threat Prediction">Predykcja zagrożeń</td><td>Empowered AI</td><td><span class="highlight">Splunk Machine Learning Toolkit</span></td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
-                <tr><td data-pl="Analiza Netflow (50k Flow/s)" data-en="Netflow Analysis (50k Flow/s)">Analiza Netflow (50k Flow/s)</td><td>Network Probe</td><td><span class="highlight">Splunk App for Stream</span></td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
+                <tr><td data-pl="Predykcja zagrożeń" data-en="Threat Prediction">Predykcja zagrożeń</td><td>Empowered AI</td><td>Splunk Machine Learning Toolkit</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
+                <tr><td data-pl="Analiza Netflow (50k Flow/s)" data-en="Netflow Analysis (50k Flow/s)">Analiza Netflow (50k Flow/s)</td><td>Network Probe</td><td>Splunk App for Stream</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
                 <tr><td data-pl="Dokumentacja IT" data-en="IT Documentation">Dokumentacja IT</td><td>e-Doc</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
                 <tr><td data-pl="Elastyczność" data-en="Flexibility">Elastyczność</td><td>Otwarty Interfejs</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Elastyczność</td></tr>
             </table>
@@ -385,9 +389,6 @@
                 <label><input type="checkbox" onchange="filterTable('technicalTable', this, 1)" data-pl="Parsing Out-of-Box" data-en="Out-of-Box Parsing"> <span>Parsing Out-of-Box</span></label>
                 <label><input type="checkbox" onchange="filterTable('technicalTable', this, 7)" data-pl="SOAR" data-en="SOAR"> <span>SOAR</span></label>
             </div>
-            <div class="search">
-                <input type="text" id="technicalSearch" placeholder="Wyszukaj..." data-en-placeholder="Search..." onkeyup="searchTable('technicalTable', this.value)">
-            </div>
             <table id="technicalTable">
                 <tr>
                     <th data-pl="Cecha" data-en="Feature"></th>
@@ -398,13 +399,13 @@
                     <th>FortiSIEM</th>
                     <th>SecureVisio</th>
                 </tr>
-                <tr><td data-pl="Parsing Out-of-Box" data-en="Out-of-Box Parsing">Parsing Out-of-Box</td><td>Tak</td><td><span class="highlight">Tak (36 sourcetypów)</span></td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-pl="Dashboardy" data-en="Dashboards">Dashboardy</td><td>Tak</td><td><span class="highlight">Apps</span></td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-pl="Alerting" data-en="Alerting">Alerting</td><td>Tak</td><td><span class="highlight">Tak (nie tylko premium)</span></td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-pl="MITRE ATT&CK" data-en="MITRE ATT&CK">MITRE ATT&CK</td><td>Tak</td><td><span class="highlight">Tak (nie tylko premium)</span></td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-pl="Parsing Out-of-Box" data-en="Out-of-Box Parsing">Parsing Out-of-Box</td><td>Tak</td><td>Tak (36 sourcetypów)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-pl="Dashboardy" data-en="Dashboards">Dashboardy</td><td>Tak</td><td>Apps</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-pl="Alerting" data-en="Alerting">Alerting</td><td>Tak</td><td>Tak (nie tylko premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-pl="MITRE ATT&CK" data-en="MITRE ATT&CK">MITRE ATT&CK</td><td>Tak</td><td>Tak (nie tylko premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
                 <tr><td data-pl="Playbooki" data-en="Playbooks">Playbooki</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak (SOAR)</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-pl="Netflow" data-en="Netflow">Netflow</td><td>Tak</td><td><span class="highlight">Tak (Splunk App for Stream)</span></td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-pl="Natywna Integracja SOAR" data-en="Native SOAR Integration">Natywna Integracja SOAR</td><td>Tak</td><td><span class="highlight">Tak</span></td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-pl="Netflow" data-en="Netflow">Netflow</td><td>Tak</td><td>Tak (Splunk App for Stream)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-pl="Natywna Integracja SOAR" data-en="Native SOAR Integration">Natywna Integracja SOAR</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
                 <tr><td data-pl="UEBA" data-en="UEBA">UEBA</td><td>Tak</td><td>Tak (premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
                 <tr><td data-pl="XDR" data-en="XDR">XDR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Nie</td></tr>
                 <tr><td data-pl="Raportowanie" data-en="Reporting">Raportowanie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Płatne</td><td>Tak</td><td>Tak</td></tr>
@@ -435,7 +436,7 @@
                     <th data-pl="Ograniczenia Wydajnościowe" data-en="Performance Limitations"></th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td>8 CPU, 16 GB RAM</td><td data-pl="Klaster Elasticsearch" data-en="Elasticsearch Cluster">Klaster Elasticsearch</td><td data-pl="Brak limitu EPS" data-en="No EPS limit">Brak limitu EPS</td></tr>
-                <tr><td>Splunk</td><td><span class="highlight">12 CPU, 24vCPU, 12 GB RAM</span> (<a href="https://docs.splunk.com/Documentation/Splunk/latest/Capacity/Referencehardware">źródło</a>)</td><td>Licencja GB/dzień</td><td>Limit GB/dzień</td></tr>
+                <tr><td>Splunk</td><td>12 CPU, 24vCPU, 12 GB RAM (<a href="https://docs.splunk.com/Documentation/Splunk/latest/Capacity/Referencehardware">źródło</a>)</td><td>Licencja GB/dzień</td><td>Limit GB/dzień</td></tr>
                 <tr><td>QRadar</td><td>16 CPU, 64 GB RAM</td><td>Dedykowane HA</td><td>Wysokie zużycie zasobów</td></tr>
                 <tr><td>Sentinel</td><td>Chmura Azure</td><td>Elastyczna</td><td>Zależna od Azure</td></tr>
                 <tr><td>FortiSIEM</td><td>12 CPU, 24 GB RAM</td><td>Multi-tenant</td><td>~50k EPS/kolektor</td></tr>
@@ -460,7 +461,7 @@
                     <th data-pl="Integracje" data-en="Integrations"></th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td data-pl="SOAR, XDR, UEBA, chmura hybrydowa" data-en="SOAR, XDR, UEBA, hybrid cloud">SOAR, XDR, UEBA, chmura hybrydowa</td></tr>
-                <tr><td>Splunk</td><td><span class="highlight">MISP + ES App</span></td></tr>
+                <tr><td>Splunk</td><td>MISP + ES App</td></tr>
                 <tr><td>QRadar</td><td>IBM X-Force, SOAR, XDR</td></tr>
                 <tr><td>Sentinel</td><td>SOAR, XDR via Defender</td></tr>
                 <tr><td>FortiSIEM</td><td>SOAR, XDR, UEBA Fortinet</td></tr>
@@ -485,7 +486,7 @@
                     <th data-pl="Threat Intelligence" data-en="Threat Intelligence"></th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td data-pl="MISP + Energy Feeds (150+)" data-en="MISP + Energy Feeds (150+)">MISP + Energy Feeds (150+)</td></tr>
-                <tr><td>Splunk</td><td><span class="highlight">MISP + ES App</span></td></tr>
+                <tr><td>Splunk</td><td>MISP + ES App</td></tr>
                 <tr><td>QRadar</td><td>IBM X-Force</td></tr>
                 <tr><td>Sentinel</td><td>Microsoft TI</td></tr>
                 <tr><td>FortiSIEM</td><td>FortiGuard</td></tr>
@@ -495,7 +496,7 @@
             <h2 data-pl="6. API i Rozszerzalność" data-en="6. API and Extensibility"></h2>
             <div class="vendor-select">
                 <label data-pl="Porównaj z:" data-en="Compare with:"></label>
-                <select id10
+                <select id="vendorApi" onchange="updateVendorTable('apiTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
                     <option value="QRadar">QRadar</option>
@@ -608,18 +609,6 @@
                         setTimeout(() => row.classList.remove('filtered'), 300);
                     }
                 }
-            }
-            updateVendorTable(tableId, document.getElementById('vendor' + tableId.replace('Table', '')).value);
-        }
-
-        function searchTable(tableId, searchTerm) {
-            var table = document.getElementById(tableId);
-            var rows = table.getElementsByTagName("tr");
-            searchTerm = searchTerm.toLowerCase();
-            for (var i = 1; i < rows.length; i++) {
-                var row = rows[i];
-                var text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? "" : "none";
             }
             updateVendorTable(tableId, document.getElementById('vendor' + tableId.replace('Table', '')).value);
         }
