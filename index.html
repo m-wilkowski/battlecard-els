@@ -15,6 +15,7 @@
         h1, h2 {
             color: #008000;
             text-align: center;
+            margin: 20px 0; /* Increased spacing */
         }
         .container {
             max-width: 1200px;
@@ -27,7 +28,7 @@
             align-items: center;
             margin-bottom: 20px;
             background-color: white;
-            padding: 10px;
+            padding: 15px;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             animation: fadeIn 0.5s ease-in;
@@ -56,7 +57,7 @@
             outline: none;
             cursor: pointer;
             padding: 14px 16px;
-            transition: 0.3s;
+            transition: background-color 0.3s, box-shadow 0.3s;
             font-size: 16px;
             color: white;
             font-weight: bold;
@@ -75,19 +76,20 @@
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            animation: slideDown 0.5s ease-in;
+            animation: fadeInTab 0.5s ease-in; /* Smoother tab transition */
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            animation: fadeIn 0.5s ease-in;
-            transition: opacity 0.3s ease;
+            border-radius: 8px; /* Rounded corners */
+            overflow: hidden; /* Ensure rounded corners apply */
         }
         th, td {
             border: 1px solid #ddd;
             padding: 10px;
             text-align: center;
+            transition: background-color 0.2s;
         }
         th {
             background-color: #008000;
@@ -96,11 +98,17 @@
         tr:nth-child(even) {
             background-color: #fff9c4; /* Less vibrant yellow */
         }
+        tr:hover {
+            background-color: #e0f7e0; /* Subtle green hover effect */
+        }
+        td:hover {
+            box-shadow: inset 0 0 5px rgba(0, 128, 0, 0.2); /* Soft shadow on cell hover */
+        }
         .cta-button {
             display: block;
             width: fit-content;
             margin: 20px auto;
-            background-color: #008000;
+            background: linear-gradient(to bottom, #00cc00, #008000); /* Gradient button */
             color: white;
             padding: 10px 20px;
             border: none;
@@ -151,6 +159,10 @@
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+        @keyframes fadeInTab {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
@@ -665,21 +677,20 @@
             doc.text(document.getElementById('header-title').textContent, margin, yOffset);
             yOffset += 10;
 
-            // Process sections (h2, p, vendor-select, filter, table)
+            // Process sections
             const sections = tab.querySelectorAll('h2, p, .vendor-select, .filter, table');
             for (let section of sections) {
-                // Create a temporary container
                 const tempContainer = document.createElement('div');
                 tempContainer.style.padding = '5px';
                 tempContainer.style.backgroundColor = '#fff';
                 tempContainer.style.width = `${pageWidth - 2 * margin}mm`;
                 tempContainer.style.fontFamily = 'Montserrat, sans-serif';
+                tempContainer.style.boxSizing = 'border-box';
 
                 if (section.tagName === 'H2' || section.tagName === 'P' || section.classList.contains('vendor-select') || section.classList.contains('filter')) {
-                    // Clone headers, paragraphs, vendor-select, and filter
-                    tempContainer.appendChild(section.cloneNode(true));
+                    const clone = section.cloneNode(true);
+                    tempContainer.appendChild(clone);
                 } else if (section.tagName === 'TABLE') {
-                    // Handle tables with vendor filtering
                     const tableId = section.id;
                     const vendorSelect = document.getElementById('vendor' + tableId.replace('Table', ''));
                     const selectedVendor = vendorSelect ? vendorSelect.value : 'all';
@@ -707,10 +718,34 @@
                         }
                     }
 
+                    // Apply styles to ensure rendering
+                    tempTable.style.width = '100%';
+                    tempTable.style.borderCollapse = 'collapse';
+                    const ths = tempTable.getElementsByTagName('th');
+                    const tds = tempTable.getElementsByTagName('td');
+                    for (let th of ths) {
+                        th.style.border = '1px solid #ddd';
+                        th.style.padding = '10px';
+                        th.style.textAlign = 'center';
+                        th.style.backgroundColor = '#008000';
+                        th.style.color = 'white';
+                    }
+                    for (let td of tds) {
+                        td.style.border = '1px solid #ddd';
+                        td.style.padding = '10px';
+                        td.style.textAlign = 'center';
+                    }
+                    const trs = tempTable.getElementsByTagName('tr');
+                    for (let i = 0; i < trs.length; i++) {
+                        if (i % 2 === 1) {
+                            trs[i].style.backgroundColor = '#fff9c4';
+                        }
+                    }
+
                     tempContainer.appendChild(tempTable);
                 }
 
-                // Append to body (visible for rendering)
+                // Append to body
                 tempContainer.style.position = 'absolute';
                 tempContainer.style.left = '0';
                 tempContainer.style.top = '0';
@@ -718,25 +753,25 @@
                 document.body.appendChild(tempContainer);
 
                 // Wait for rendering
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay
 
                 try {
-                    // Capture as canvas
                     const canvas = await html2canvas(tempContainer, {
-                        scale: 2, // Balanced resolution
+                        scale: 2,
                         useCORS: true,
                         backgroundColor: '#ffffff',
                         logging: true,
                         width: tempContainer.offsetWidth,
-                        height: tempContainer.offsetHeight
+                        height: tempContainer.offsetHeight,
+                        windowWidth: document.documentElement.offsetWidth,
+                        windowHeight: document.documentElement.offsetHeight
                     });
 
-                    const imgData = canvas.toDataURL('image/png', 1.0); // Use PNG for better quality
+                    const imgData = canvas.toDataURL('image/png', 1.0);
                     const imgProps = doc.getImageProperties(imgData);
                     const imgWidth = pageWidth - 2 * margin;
                     const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 
-                    // Check for page break
                     if (yOffset + imgHeight + margin > pageHeight) {
                         doc.addPage();
                         yOffset = margin;
@@ -745,14 +780,12 @@
                     doc.addImage(imgData, 'PNG', margin, yOffset, imgWidth, imgHeight);
                     yOffset += imgHeight + 5;
                 } catch (error) {
-                    console.error('Failed to render section:', error);
+                    console.error('Failed to render section:', section, error);
                 }
 
-                // Clean up
                 document.body.removeChild(tempContainer);
             }
 
-            // Save PDF
             doc.save('EnergyLogserver_Battlecard.pdf');
         }
 
