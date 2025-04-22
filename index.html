@@ -266,6 +266,324 @@
                 <tr><td data-i18n="marketing_section3_table_open_interface">Otwarty Interfejs</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
                 <tr><td data-i18n="marketing_section3_table_certifications">Certyfikaty</td><td>GDPR, SOC2</td><td>GDPR, SOC2, PCI DSS, HIPAA, FedRAMP</td><td>FedRAMP</td><td>SOC2</td><td>NSS Labs</td><td>KNF, RODO</td></tr>
                 <tr><td data-i18n="marketing_section3_table_support_response">Czas Reakcji Wsparcia</td><td><1h</td><td>Premium 30 minut</td><td>2h</td><td>Via Azure</td><td>4h</td><td><1h</td></tr>
+                <tr><td data-i18n="marketing_section3_table_initial_costs">Koszty Początkowe</td><td>Niski</td><td>Wysoki</td><td>WIndirect: true
+                User: Grok 3, built by xAI
+
+System: Dziękuję za przesłanie zrzutu ekranu i opisu problemu. Widzę, że strona `https://m-wilkowski.github.io/battlecard-els/` nadal nie wyświetla treści poniżej zakładek, a przełączanie języków nie działa. Na podstawie zrzutu ekranu i błędów w konsoli (`ReferenceError: openTab is not defined`), zidentyfikowałem przyczyny problemu i dostarczę poprawiony kod, aby przywrócić pełną funkcjonalność strony.
+
+### Diagnoza problemu
+Na zrzucie ekranu widzę, że:
+- Logo EnergyLogserver jest widoczne, co oznacza, że ścieżka do `ELS_dark.png` jest poprawna.
+- Zakładki "Marketingowy" i "Techniczny" są widoczne, ale treść poniżej nich nie jest renderowana.
+- Przełącznik językowy jest obecny, ale przełączanie języków nie działa.
+- Konsola pokazuje błąd: `ReferenceError: openTab is not defined`, co wskazuje, że funkcja `openTab` nie jest zdefiniowana w momencie wywołania.
+
+#### Przyczyny problemów:
+1. **Błąd składniowy w JavaScript**:
+   - Kod JavaScript w sekcji `<script>` został przerwany w środku funkcji `updateVendorTable`, co powoduje błąd składniowy. To uniemożliwia wykonanie reszty skryptu, w tym definicji funkcji `openTab`, `filterTable`, `searchTable`, `setupPagination`, `exportToPDF` i `switchLanguage`. Błąd `ReferenceError: openTab is not defined` wynika z faktu, że funkcja `openTab` nie została zdefiniowana przed jej wywołaniem w zdarzeniach `onclick` w HTML.
+   - Brak definicji funkcji `switchLanguage` i innych funkcji uniemożliwia inicjalizację języka i renderowanie treści.
+
+2. **Brak widocznej treści**:
+   - Funkcja `openTab` ustawia `display: block` dla aktywnej zakładki, ale z powodu błędu składniowego nie jest wywoływana. Wszystkie elementy `.tabcontent` pozostają z domyślnym stylem `display: none`, co powoduje brak widocznej treści.
+   - Funkcja `switchLanguage` również nie działa, więc elementy z atrybutem `data-i18n` nie są aktualizowane, co dodatkowo może wpływać na brak treści.
+
+3. **Problemy z przełączaniem języków**:
+   - Funkcja `switchLanguage` nie jest zdefiniowana z powodu przerwania kodu JavaScript, więc przełącznik językowy nie działa.
+   - Brak inicjalizacji języka przy ładowaniu strony powoduje, że treść nie jest wyświetlana domyślnie.
+
+### Rozwiązanie
+Aby naprawić te problemy, wprowadziłem następujące poprawki:
+1. **Naprawa JavaScript**:
+   - Uzupełniłem funkcję `updateVendorTable` i wszystkie pozostałe funkcje (`setupPagination`, `exportToPDF`), aby kod był kompletny i wolny od błędów składniowych.
+   - Upewniłem się, że wszystkie funkcje (`openTab`, `filterTable`, `searchTable`, `updateVendorTable`, `setupPagination`, `exportToPDF`, `switchLanguage`) są poprawnie zdefiniowane i dostępne w momencie wywołania.
+
+2. **Inicjalizacja strony**:
+   - Dodałem wywołanie `openTab` i `switchLanguage` przy ładowaniu strony, aby domyślna zakładka "Marketingowy" była widoczna, a język ustawiony na polski (`pl`).
+   - Upewniłem się, że wszystkie elementy z atrybutem `data-i18n` są poprawnie aktualizowane.
+
+3. **Uproszczenie tłumaczeń**:
+   - Uprościłem strukturę obiektu `translations`, aby uniknąć błędów w dostępie do kluczy.
+   - Dodałem logi konsolowe w funkcji `switchLanguage`, aby ułatwić debugowanie.
+
+4. **Zachowanie wcześniejszych modyfikacji**:
+   - Logo ustawione na `ELS_dark.png`.
+   - Czcionka Montserrat, usunięte sekcje "Case Study" i "Kontakt".
+   - Poprawki dla Splunk (np. natywna integracja SOAR, certyfikaty).
+   - Naprawione dropdowny "Porównaj z" w sekcji Techniczny.
+   - Dostępność (ARIA), SEO (meta tagi), design (FontAwesome, kontrast `#FFFACD`).
+
+### Poprawiony kod
+Poniżej znajduje się pełny, poprawiony kod `index.html`. Kod zachowuje ten sam `artifact_id`, ponieważ jest to aktualizacja istniejącego battlecardu.
+
+<xaiArtifact artifact_id="f40df3f3-472d-4b0f-9cf8-5971f0a45300" artifact_version_id="4103edc2-e5dc-4333-831a-8d83d5078a87" title="index.html" contentType="text/html">
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EnergyLogserver Battlecard – porównanie SIEM z konkurencją, kluczowe przewagi.">
+    <meta name="keywords" content="SIEM, EnergyLogserver, cybersecurity, Splunk, QRadar, Sentinel">
+    <meta property="og:title" content="EnergyLogserver – Battlecard SIEM">
+    <meta property="og:description" content="Porównaj EnergyLogserver z innymi rozwiązaniami SIEM.">
+    <meta property="og:image" content="ELS_dark.png">
+    <title data-i18n="title">EnergyLogserver Battlecard – Porównanie SIEM 2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.min.js"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            margin: 20px;
+            background-color: #f1f1f1;
+            color: #333;
+        }
+        h1, h2 {
+            color: #006400;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in;
+        }
+        .logo {
+            max-width: 150px;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        .logo-fallback {
+            font-size: 1.5em;
+            color: #006400;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #006400;
+            border-radius: 5px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+            color: #006400;
+        }
+        .tab button:hover {
+            background-color: #FFFACD;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .tab button.active {
+            background-color: #006400;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 100, 0, 0.3);
+        }
+        .tab button:focus {
+            outline: 2px solid #006400;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            background-color: white;
+            animation: slideDown 0.5s ease-in;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+            transition: opacity 0.3s ease;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #006400;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #FFFACD;
+        }
+        .cta-button {
+            background-color: #006400;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 5px;
+        }
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 100, 0, 0.3);
+        }
+        .cta-button:focus {
+            outline: 2px solid #006400;
+        }
+        .filter, .search, .vendor-select {
+            margin-bottom: 20px;
+        }
+        .vendor-select select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .vendor-select select:focus {
+            outline: 2px solid #006400;
+        }
+        .pdf-export {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .language-switcher select {
+            padding: 5px;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .language-switcher select:focus {
+            outline: 2px solid #006400;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeToggle {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        tr.filtered {
+            animation: fadeToggle 0.3s ease-in-out;
+        }
+        @media screen and (max-width: 768px) {
+            .container { margin: 10px; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .logo { max-width: 100px; margin-bottom: 10px; }
+            table { display: block; overflow-x: auto; }
+            .tab button { padding: 10px 12px; font-size: 14px; }
+            .tabcontent { padding: 15px; }
+            .language-switcher { top: 10px; right: 10px; }
+        }
+        @media screen and (max-width: 480px) {
+            .header { padding: 5px; }
+            .logo { max-width: 80px; }
+            .tab button { padding: 8px 10px; font-size: 12px; }
+            .cta-button { padding: 8px 15px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="language-switcher">
+            <select id="languageSelect" onchange="switchLanguage(this.value)" aria-label="Wybierz język">
+                <option value="pl">Polski</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+        <div class="header">
+            <div>
+                <h1 data-i18n="header_title">EnergyLogserver – Battlecard SIEM</h1>
+                <p><strong data-i18n="header_slogan_label">Hasło:</strong> <span data-i18n="header_slogan">"Bezpieczeństwo na wyciągnięcie ręki – elastyczne, skalowalne, wspierane lokalnie."</span></p>
+                <p><strong data-i18n="header_date_label">Data:</strong> <span data-i18n="header_date">Luty 2025</span></p>
+            </div>
+            <img src="ELS_dark.png" alt="EnergyLogserver Logo" class="logo" onerror="console.error('Failed to load logo at ELS_dark.png'); this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="logo-fallback" style="display:none;">Logo EnergyLogserver</div>
+        </div>
+
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Marketing')" id="defaultOpen" aria-controls="Marketing" aria-expanded="true"><i class="fas fa-bullhorn"></i> <span data-i18n="tab_marketing">Marketingowy</span></button>
+            <button class="tablinks" onclick="openTab(event, 'Techniczny')" aria-controls="Techniczny" aria-expanded="false"><i class="fas fa-cogs"></i> <span data-i18n="tab_technical">Techniczny</span></button>
+        </div>
+
+        <div id="Marketing" class="tabcontent">
+            <h2><i class="fas fa-info-circle"></i> <span data-i18n="marketing_section1_title">1. Opis Rozwiązania</span></h2>
+            <p data-i18n="marketing_section1_description">EnergyLogserver to nowoczesny SIEM łączący analizę zagrożeń w czasie rzeczywistym, intuicyjne dashboardy i pełne wsparcie techniczne w języku polskim. Idealny dla firm każdej wielkości, oferujący niskie TCO, szybkie wdrożenie oraz zaawansowaną automatyzację dzięki natywnej integracji z SOAR, XDR i UEBA.</p>
+
+            <h2><i class="fas fa-map-marker-alt"></i> <span data-i18n="marketing_section2_title">2. Pozycjonowanie Rynkowe</span></h2>
+            <p data-i18n="marketing_section2_description">Dla kogo: Małe i średnie przedsiębiorstwa (MSP), sektor finansowy, przemysłowy, administracja publiczna.<br>Klienci: Lokalne banki, firmy produkcyjne, dostawcy usług IT.<br>Konkurencja: EnergyLogserver rośnie w Polsce dzięki lokalnemu wsparciu, niższym kosztom i elastyczności.</p>
+
+            <h2><i class="fas fa-trophy"></i> <span data-i18n="marketing_section3_title">3. Kluczowe Przewagi</span></h2>
+            <div class="vendor-select">
+                <label for="vendorMarketing" data-i18n="marketing_section3_compare_label">Porównaj z:</label>
+                <select id="vendorMarketing" onchange="updateVendorTable('marketingTable', this.value)" aria-label="Wybierz konkurenta do porównania">
+                    <option value="all" data-i18n="marketing_section3_compare_all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <div class="filter">
+                <label><input type="checkbox" checked onchange="filterTable('marketingTable', this)" data-i18n="marketing_section3_filter_all">Pokaż wszystko</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 1)" data-i18n="marketing_section3_filter_licensing">Licencjonowanie</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 2)" data-i18n="marketing_section3_filter_support">Wsparcie</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 6)" data-i18n="marketing_section3_filter_soar">SOAR</label>
+            </div>
+            <div class="search">
+                <input type="text" id="marketingSearch" placeholder="Wyszukaj..." onkeyup="searchTable('marketingTable', this.value)" aria-label="Wyszukaj w tabeli" data-i18n-placeholder="marketing_section3_search_placeholder">
+            </div>
+            <table id="marketingTable">
+                <tr>
+                    <th data-i18n="marketing_section3_table_feature">Cecha</th>
+                    <th>EnergyLogserver</th>
+                    <th>Splunk</th>
+                    <th>QRadar</th>
+                    <th>Sentinel</th>
+                    <th>FortiSIEM</th>
+                    <th>SecureVisio</th>
+                </tr>
+                <tr><td data-i18n="marketing_section3_table_licensing">Licencjonowanie</td><td>Sub/Wieczysta</td><td>Sub (GB/dzień)</td><td>Sub</td><td>Chmurowa</td><td>Sub</td><td>Sub</td></tr>
+                <tr><td data-i18n="marketing_section3_table_support">Wsparcie</td><td>Dedykowane, PL</td><td>Płatne, ENG</td><td>Płatne, PL</td><td>Microsoft ENG</td><td>Płatne, ENG</td><td>Dedykowane, PL</td></tr>
+                <tr><td data-i18n="marketing_section3_table_tco">Koszt TCO</td><td>Niski</td><td>Bardzo wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Średni</td></tr>
+                <tr><td data-i18n="marketing_section3_table_deployment_time">Czas Wdrożenia</td><td>Godziny</td><td>Dni</td><td>Dni</td><td>Godziny</td><td>Dni</td><td>Godziny</td></tr>
+                <tr><td data-i18n="marketing_section3_table_ti_feeds">Lokalne TI Feeds</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
+                <tr><td data-i18n="marketing_section3_table_soar">Natywna Integracja SOAR</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-i18n="marketing_section3_table_ueba">UEBA</td><td>Tak</td><td>Płatne</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td data-i18n="marketing_section3_table_xdr">XDR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Nie</td></tr>
+                <tr><td data-i18n="marketing_section3_table_open_interface">Otwarty Interfejs</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
+                <tr><td data-i18n="marketing_section3_table_certifications">Certyfikaty</td><td>GDPR, SOC2</td><td>GDPR, SOC2, PCI DSS, HIPAA, FedRAMP</td><td>FedRAMP</td><td>SOC2</td><td>NSS Labs</td><td>KNF, RODO</td></tr>
+                <tr><td data-i18n="marketing_section3_table_support_response">Czas Reakcji Wsparcia</td><td><1h</td><td>Premium 30 minut</td><td>2h</td><td>Via Azure</td><td>4h</td><td><1h</td></tr>
                 <tr><td data-i18n="marketing_section3_table_initial_costs">Koszty Początkowe</td><td>Niski</td><td>Wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Niski</td></tr>
             </table>
             <div class="pagination" id="marketingTablePagination"></div>
@@ -432,251 +750,4 @@
                 <tr><td data-i18n="technical_section2_table_parsing">Parsing Out-of-Box</td><td>Tak</td><td>Tak (36 sourcetypów z pudełka)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
                 <tr><td data-i18n="technical_section2_table_dashboards">Dashboardy</td><td>Tak</td><td>Apps</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
                 <tr><td data-i18n="technical_section2_table_alerting">Alerting</td><td>Tak</td><td>Tak (nie tylko premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_mitre">MITRE ATT&CK</td><td>Tak</td><td>Tak (nie tylko premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_playbooks">Playbooki</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak (SOAR)</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_netflow">Netflow</td><td>Tak</td><td>Tak (add-on)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_soar">Natywna Integracja SOAR</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_ueba">UEBA</td><td>Tak</td><td>Tak (premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_xdr">XDR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Nie</td></tr>
-                <tr><td data-i18n="technical_section2_table_reporting">Raportowanie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Płatne</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_open_interface">Otwarty Interfejs</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_platforms">Wieloplatformowość</td><td>Win/Linux/Chmura</td><td>Win/Linux/Chmura</td><td>Win/Linux/Chmura</td><td>Azure</td><td>Win/Linux/Chmura</td><td>Win/Linux</td></tr>
-                <tr><td data-i18n="technical_section2_table_deployment_time">Czas Wdrożenia</td><td>1-2 dni</td><td>5-10 dni</td><td>3-7 dni</td><td>1-3 dni</td><td>3-5 dni</td><td>1-2 dni</td></tr>
-                <tr><td data-i18n="technical_section2_table_hybrid_cloud">Chmura Hybrydowa</td><td>Tak</td><td>Tak (złożone)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
-                <tr><td data-i18n="technical_section2_table_data_sources">Źródła Danych</td><td>100+</td><td>500+</td><td>450+</td><td>200+</td><td>400+</td><td>150+</td></tr>
-            </table>
-            <div class="pagination" id="technicalTablePagination"></div>
-
-            <h2><i class="fas fa-cog"></i> <span data-i18n="technical_section3_title">3. Wymagania i Skalowalność</span></h2>
-            <div class="vendor-select">
-                <label for="vendorRequirements" data-i18n="technical_section3_compare_label">Porównaj z:</label>
-                <select id="vendorRequirements" onchange="updateVendorTable('requirementsTable', this.value)" aria-label="Wybierz konkurenta do porównania">
-                    <option value="all" data-i18n="technical_section3_compare_all">Wszyscy</option>
-                    <option value="Splunk">Splunk</option>
-                    <option value="QRadar">QRadar</option>
-                    <option value="Sentinel">Sentinel</option>
-                    <option value="FortiSIEM">FortiSIEM</option>
-                    <option value="SecureVisio">SecureVisio</option>
-                </select>
-            </div>
-            <table id="requirementsTable">
-                <tr>
-                    <th data-i18n="technical_section3_table_solution">Rozwiązanie</th>
-                    <th data-i18n="technical_section3_table_min_requirements">Wymagania Min.</th>
-                    <th data-i18n="technical_section3_table_scalability">Skalowalność</th>
-                    <th data-i18n="technical_section3_table_performance_limits">Ograniczenia Wydajnościowe</th>
-                </tr>
-                <tr><td>EnergyLogserver</td><td>8 CPU, 16 GB RAM</td><td data-i18n="technical_section3_table_els_scalability">Klaster Elasticsearch</td><td data-i18n="technical_section3_table_els_limits">Brak limitu EPS</td></tr>
-                <tr><td>Splunk</td><td>12 CPU, 24vCPU, 12GB RAM</td><td data-i18n="technical_section3_table_splunk_scalability">Licencja GB/dzień</td><td data-i18n="technical_section3_table_splunk_limits">Limit GB/dzień</td></tr>
-                <tr><td>QRadar</td><td>16 CPU, 64 GB RAM</td><td data-i18n="technical_section3_table_qradar_scalability">Dedykowane HA</td><td data-i18n="technical_section3_table_qradar_limits">Wysokie zużycie zasobów</td></tr>
-                <tr><td>Sentinel</td><td data-i18n="technical_section3_table_sentinel_requirements">Chmura Azure</td><td data-i18n="technical_section3_table_sentinel_scalability">Elastyczna</td><td data-i18n="technical_section3_table_sentinel_limits">Zależna od Azure</td></tr>
-                <tr><td>FortiSIEM</td><td>12 CPU, 24 GB RAM</td><td data-i18n="technical_section3_table_fortisiem_scalability">Multi-tenant</td><td data-i18n="technical_section3_table_fortisiem_limits">~50k EPS/kolektor</td></tr>
-                <tr><td>SecureVisio</td><td>8 CPU, 16 GB RAM</td><td data-i18n="technical_section3_table_securevisio_scalability">Klaster</td><td data-i18n="technical_section3_table_securevisio_limits">~30k EPS</td></tr>
-            </table>
-            <div class="pagination" id="requirementsTablePagination"></div>
-
-            <h2><i class="fas fa-plug"></i> <span data-i18n="technical_section4_title">4. Integracje z Ekosystemem</span></h2>
-            <div class="vendor-select">
-                <label for="vendorIntegrations" data-i18n="technical_section4_compare_label">Porównaj z:</label>
-                <select id="vendorIntegrations" onchange="updateVendorTable('integrationsTable', this.value)" aria-label="Wybierz konkurenta do porównania">
-                    <option value="all" data-i18n="technical_section4_compare_all">Wszyscy</option>
-                    <option value="Splunk">Splunk</option>
-                    <option value="QRadar">QRadar</option>
-                    <option value="Sentinel">Sentinel</option>
-                    <option value="FortiSIEM">FortiSIEM</option>
-                    <option value="SecureVisio">SecureVisio</option>
-                </select>
-            </div>
-            <table id="integrationsTable">
-                <tr>
-                    <th data-i18n="technical_section4_table_solution">Rozwiązanie</th>
-                    <th data-i18n="technical_section4_table_integrations">Integracje</th>
-                </tr>
-                <tr><td>EnergyLogserver</td><td data-i18n="technical_section4_table_els_integrations">SOAR, XDR, UEBA, chmura hybrydowa</td></tr>
-                <tr><td>Splunk</td><td data-i18n="technical_section4_table_splunk_integrations">MISP + ES App</td></tr>
-                <tr><td>QRadar</td><td data-i18n="technical_section4_table_qradar_integrations">IBM X-Force, SOAR, XDR</td></tr>
-                <tr><td>Sentinel</td><td data-i18n="technical_section4_table_sentinel_integrations">SOAR, XDR via Defender</td></tr>
-                <tr><td>FortiSIEM</td><td data-i18n="technical_section4_table_fortisiem_integrations">SOAR, XDR, UEBA Fortinet</td></tr>
-                <tr><td>SecureVisio</td><td data-i18n="technical_section4_table_securevisio_integrations">SOAR, UEBA lokalne</td></tr>
-            </table>
-            <div class="pagination" id="integrationsTablePagination"></div>
-
-            <h2><i class="fas fa-file-pdf"></i> <span data-i18n="technical_section5_title">5. Eksport do PDF</span></h2>
-            <div class="pdf-export">
-                <label for="pdfVendorTech" data-i18n="technical_section5_pdf_label">Wybierz konkurenta do PDF:</label>
-                <select id="pdfVendorTech" aria-label="Wybierz konkurenta do eksportu PDF">
-                    <option value="all" data-i18n="technical_section5_pdf_all">Wszyscy</option>
-                    <option value="Splunk">Splunk</option>
-                    <option value="QRadar">QRadar</option>
-                    <option value="Sentinel">Sentinel</option>
-                    <option value="FortiSIEM">FortiSIEM</option>
-                    <option value="SecureVisio">SecureVisio</option>
-                </select>
-                <button class="cta-button" onclick="exportToPDF('Techniczny')"><i class="fas fa-download"></i> <span data-i18n="technical_section5_pdf_button">Pobierz PDF</span></button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const translations = {
-            pl: {
-                title: "EnergyLogserver Battlecard – Porównanie SIEM 2025",
-                header_title: "EnergyLogserver – Battlecard SIEM",
-                header_slogan_label: "Hasło:",
-                header_slogan: "Bezpieczeństwo na wyciągnięcie ręki – elastyczne, skalowalne, wspierane lokalnie.",
-                header_date_label: "Data:",
-                header_date: "Luty 2025",
-                tab_marketing: "Marketingowy",
-                tab_technical: "Techniczny",
-                marketing_section1_title: "1. Opis Rozwiązania",
-                marketing_section1_description: "EnergyLogserver to nowoczesny SIEM łączący analizę zagrożeń w czasie rzeczywistym, intuicyjne dashboardy i pełne wsparcie techniczne w języku polskim. Idealny dla firm każdej wielkości, oferujący niskie TCO, szybkie wdrożenie oraz zaawansowaną automatyzację dzięki natywnej integracji z SOAR, XDR i UEBA.",
-                marketing_section2_title: "2. Pozycjonowanie Rynkowe",
-                marketing_section2_description: "Dla kogo: Małe i średnie przedsiębiorstwa (MSP), sektor finansowy, przemysłowy, administracja publiczna.<br>Klienci: Lokalne banki, firmy produkcyjne, dostawcy usług IT.<br>Konkurencja: EnergyLogserver rośnie w Polsce dzięki lokalnemu wsparciu, niższym kosztom i elastyczności.",
-                marketing_section3_title: "3. Kluczowe Przewagi",
-                marketing_section3_compare_label: "Porównaj z:",
-                marketing_section3_compare_all: "Wszyscy",
-                marketing_section3_filter_all: "Pokaż wszystko",
-                marketing_section3_filter_licensing: "Licencjonowanie",
-                marketing_section3_filter_support: "Wsparcie",
-                marketing_section3_filter_soar: "SOAR",
-                marketing_section3_search_placeholder: "Wyszukaj...",
-                marketing_section3_table_feature: "Cecha",
-                marketing_section3_table_licensing: "Licencjonowanie",
-                marketing_section3_table_support: "Wsparcie",
-                marketing_section3_table_tco: "Koszt TCO",
-                marketing_section3_table_deployment_time: "Czas Wdrożenia",
-                marketing_section3_table_ti_feeds: "Lokalne TI Feeds",
-                marketing_section3_table_soar: "Natywna Integracja SOAR",
-                marketing_section3_table_ueba: "UEBA",
-                marketing_section3_table_xdr: "XDR",
-                marketing_section3_table_open_interface: "Otwarty Interfejs",
-                marketing_section3_table_certifications: "Certyfikaty",
-                marketing_section3_table_support_response: "Czas Reakcji Wsparcia",
-                marketing_section3_table_initial_costs: "Koszty Początkowe",
-                marketing_section4_title: "4. Kluczowe Korzyści Biznesowe",
-                marketing_section4_compare_label: "Porównaj z:",
-                marketing_section4_compare_all: "Wszyscy",
-                marketing_section4_table_benefit: "Korzyść",
-                marketing_section4_table_features: "Funkcjonalności",
-                marketing_section4_table_support_pl: "Wsparcie w PL",
-                marketing_section4_table_costs: "Koszty",
-                marketing_section4_table_scalability: "Skalowalność",
-                marketing_section4_table_automation: "Automatyzacja",
-                marketing_section4_table_flexibility: "Elastyczność",
-                marketing_section5_title: "5. Opinie Użytkowników",
-                marketing_section5_compare_label: "Porównaj z:",
-                marketing_section5_compare_all: "Wszyscy",
-                marketing_section5_table_solution: "Rozwiązanie",
-                marketing_section5_table_praised: "Chwalone",
-                marketing_section5_table_criticism: "Krytyka",
-                marketing_section5_table_els_praised: "Szybkie wdrożenie, support PL",
-                marketing_section5_table_els_criticism: "Mniejsza rozpoznawalność",
-                marketing_section5_table_splunk_praised: "Analityka",
-                marketing_section5_table_splunk_criticism: "Koszty, złożoność",
-                marketing_section5_table_qradar_praised: "AI",
-                marketing_section5_table_qradar_criticism: "Zasoby, administracja",
-                marketing_section5_table_sentinel_praised: "Azure",
-                marketing_section5_table_sentinel_criticism: "Raporty",
-                marketing_section5_table_fortisiem_praised: "Sieć",
-                marketing_section5_table_fortisiem_criticism: "Wydajność",
-                marketing_section5_table_securevisio_praised: "Support PL",
-                marketing_section5_table_securevisio_criticism: "Skalowalność",
-                marketing_section6_title: "6. Unikalne Funkcjonalności EnergyLogserver",
-                marketing_section6_compare_label: "Porównaj z:",
-                marketing_section6_compare_all: "Wszyscy",
-                marketing_section6_table_feature: "Funkcjonalność",
-                marketing_section6_table_ai: "Empowered AI",
-                marketing_section6_table_prediction: "Predykcja zagrożeń",
-                marketing_section6_table_network: "Network Probe",
-                marketing_section6_table_netflow: "Analiza Netflow (50k Flow/s)",
-                marketing_section6_table_edoc: "e-Doc",
-                marketing_section6_table_documentation: "Dokumentacja IT",
-                marketing_section6_table_interface: "Otwarty Interfejs",
-                marketing_section6_table_flexibility: "Elastyczność",
-                marketing_section7_title: "7. Eksport do PDF",
-                marketing_section7_pdf_label: "Wybierz konkurenta do PDF:",
-                marketing_section7_pdf_all: "Wszyscy",
-                marketing_section7_pdf_button: "Pobierz PDF",
-                technical_section1_title: "1. Architektura Systemu",
-                technical_section1_compare_label: "Porównaj z:",
-                technical_section1_compare_all: "Wszyscy",
-                technical_section1_table_solution: "Rozwiązanie",
-                technical_section1_table_architecture: "Architektura",
-                technical_section1_table_els_architecture: "Elasticsearch, Logstash, Kibana + GUI, wsparcie UEBA",
-                technical_section1_table_splunk_architecture: "Własny silnik, wymaga dodatków",
-                technical_section1_table_qradar_architecture: "Architektura z AI Watson",
-                technical_section1_table_sentinel_architecture: "Chmurowy, Azure Log Analytics",
-                technical_section1_table_fortisiem_architecture: "Multi-tenant z kolektorami",
-                technical_section1_table_securevisio_architecture: "Polski SIEM, compliance",
-                technical_section2_title: "2. Kluczowe Przewagi",
-                technical_section2_compare_label: "Porównaj z:",
-                technical_section2_compare_all: "Wszyscy",
-                technical_section2_filter_all: "Pokaż wszystko",
-                technical_section2_filter_parsing: "Parsing Out-of-Box",
-                technical_section2_filter_soar: "SOAR",
-                technical_section2_search_placeholder: "Wyszukaj...",
-                technical_section2_table_feature: "Cecha",
-                technical_section2_table_parsing: "Parsing Out-of-Box",
-                technical_section2_table_dashboards: "Dashboardy",
-                technical_section2_table_alerting: "Alerting",
-                technical_section2_table_mitre: "MITRE ATT&CK",
-                technical_section2_table_playbooks: "Playbooki",
-                technical_section2_table_netflow: "Netflow",
-                technical_section2_table_soar: "Natywna Integracja SOAR",
-                technical_section2_table_ueba: "UEBA",
-                technical_section2_table_xdr: "XDR",
-                technical_section2_table_reporting: "Raportowanie",
-                technical_section2_table_open_interface: "Otwarty Interfejs",
-                technical_section2_table_platforms: "Wieloplatformowość",
-                technical_section2_table_deployment_time: "Czas Wdrożenia",
-                technical_section2_table_hybrid_cloud: "Chmura Hybrydowa",
-                technical_section2_table_data_sources: "Źródła Danych",
-                technical_section3_title: "3. Wymagania i Skalowalność",
-                technical_section3_compare_label: "Porównaj z:",
-                technical_section3_compare_all: "Wszyscy",
-                technical_section3_table_solution: "Rozwiązanie",
-                technical_section3_table_min_requirements: "Wymagania Min.",
-                technical_section3_table_scalability: "Skalowalność",
-                technical_section3_table_performance_limits: "Ograniczenia Wydajnościowe",
-                technical_section3_table_els_scalability: "Klaster Elasticsearch",
-                technical_section3_table_els_limits: "Brak limitu EPS",
-                technical_section3_table_splunk_scalability: "Licencja GB/dzień",
-                technical_section3_table_splunk_limits: "Limit GB/dzień",
-                technical_section3_table_qradar_scalability: "Dedykowane HA",
-                technical_section3_table_qradar_limits: "Wysokie zużycie zasobów",
-                technical_section3_table_sentinel_requirements: "Chmura Azure",
-                technical_section3_table_sentinel_scalability: "Elastyczna",
-                technical_section3_table_sentinel_limits: "Zależna od Azure",
-                technical_section3_table_fortisiem_scalability: "Multi-tenant",
-                technical_section3_table_fortisiem_limits: "~50k EPS/kolektor",
-                technical_section3_table_securevisio_scalability: "Klaster",
-                technical_section3_table_securevisio_limits: "~30k EPS",
-                technical_section4_title: "4. Integracje z Ekosystemem",
-                technical_section4_compare_label: "Porównaj z:",
-                technical_section4_compare_all: "Wszyscy",
-                technical_section4_table_solution: "Rozwiązanie",
-                technical_section4_table_integrations: "Integracje",
-                technical_section4_table_els_integrations: "SOAR, XDR, UEBA, chmura hybrydowa",
-                technical_section4_table_splunk_integrations: "MISP + ES App",
-                technical_section4_table_qradar_integrations: "IBM X-Force, SOAR, XDR",
-                technical_section4_table_sentinel_integrations: "SOAR, XDR via Defender",
-                technical_section4_table_fortisiem_integrations: "SOAR, XDR, UEBA Fortinet",
-                technical_section4_table_securevisio_integrations: "SOAR, UEBA lokalne",
-                technical_section5_title: "5. Eksport do PDF",
-                technical_section5_pdf_label: "Wybierz konkurenta do PDF:",
-                technical_section5_pdf_all: "Wszyscy",
-                technical_section5_pdf_button: "Pobierz PDF"
-            },
-            en: {
-                title: "EnergyLogserver Battlecard – SIEM Comparison 2025",
-                header_title: "EnergyLogserver – SIEM Battlecard",
-                header_slogan_label: "Slogan:",
-                header_slogan: "Security at your fingertips – flexible, scalable, locally supported.",
-                header_date_label: "Date:",
-                header_date: "February 2025",
-                tab_marketing: "Marketing",
-                tab_technical: "Technical",
-                marketing_section1_title: "1. Solution Overview",
-                marketing_section1_description: "EnergyLogserver is a modern SIEM combining real-time threat analysis, intuitive dashboards, and full technical support in Polish. Ideal for companies of all sizes, offering low TCO, rapid deployment, and advanced automation through native integration with SOAR, XDR, and UEBA.",
-                marketing_section2_title: "2. Market Positioning",
-                marketing_section2_description: "Target: Small and medium enterprises (SMEs),
+                <tr><td data-i18n="technical_section2_table
