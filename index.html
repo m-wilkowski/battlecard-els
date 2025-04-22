@@ -51,7 +51,7 @@
             animation: fadeIn 0.5s ease-in;
         }
         .tab button {
-            background-color: #008000;
+            background-color: #006400; /* Darker green for non-active */
             border: none;
             outline: none;
             cursor: pointer;
@@ -63,11 +63,11 @@
             border-radius: 10px;
         }
         .tab button:hover {
-            background-color: #006400;
+            background-color: #008000;
         }
         .tab button.active {
-            background-color: #008000;
-            color: white;
+            background-color: #00cc00; /* Brighter green for active */
+            box-shadow: 0 0 8px rgba(0, 204, 0, 0.5);
         }
         .tabcontent {
             display: none;
@@ -179,8 +179,7 @@
             .cta-button { padding: 8px 15px; font-size: 14px; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -647,94 +646,74 @@
         }
 
         async function exportToPDF(tabName) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
             const tab = document.getElementById(tabName);
-            const tables = tab.querySelectorAll('table');
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const margin = 10;
-            let yOffset = 10;
-
-            // Add title
-            doc.setFont('Montserrat', 'bold');
-            doc.setFontSize(16);
-            doc.text(document.getElementById('header-title').textContent, margin, yOffset);
-            yOffset += 10;
-
-            for (let table of tables) {
-                const tableId = table.id;
-                const vendorSelect = document.getElementById('vendor' + tableId.replace('Table', ''));
-                const selectedVendor = vendorSelect ? vendorSelect.value : 'all';
-                const sectionTitle = table.previousElementSibling?.textContent || '';
-
-                // Add section title
-                doc.setFontSize(12);
-                doc.text(sectionTitle, margin, yOffset);
-                yOffset += 8;
-
-                // Clone table to manipulate for export
-                const tempTable = table.cloneNode(true);
-                if (selectedVendor !== 'all') {
-                    const headers = tempTable.getElementsByTagName('th');
-                    const rows = tempTable.getElementsByTagName('tr');
-                    let vendorIndex = -1;
-                    for (let i = 0; i < headers.length; i++) {
-                        if (headers[i].textContent === selectedVendor) {
-                            vendorIndex = i;
-                            break;
-                        }
-                    }
-                    for (let j = 0; j < headers.length; j++) {
-                        headers[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
-                    }
-                    for (let i = 1; i < rows.length; i++) {
-                        const cells = rows[i].getElementsByTagName('td');
-                        for (let j = 0; j < cells.length; j++) {
-                            cells[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
-                        }
-                    }
-                }
-
-                // Create a temporary container for the table
-                const tempContainer = document.createElement('div');
-                tempContainer.style.position = 'absolute';
-                tempContainer.style.top = '-9999px';
-                tempContainer.appendChild(tempTable);
-                document.body.appendChild(tempContainer);
-
-                // Capture table as canvas
-                const canvas = await html2canvas(tempTable, {
-                    scale: 4, // Higher resolution for clarity
-                    useCORS: true,
-                    backgroundColor: '#ffffff',
+            const opt = {
+                margin: [10, 10, 10, 10], // Top, Right, Bottom, Left
+                filename: 'EnergyLogserver_Battlecard.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, // Moderate scale for clarity
+                    useCORS: true, 
                     logging: false,
-                    width: tempTable.offsetWidth,
-                    height: tempTable.offsetHeight
-                });
-
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                const imgProps = doc.getImageProperties(imgData);
-                const imgWidth = pageWidth - 2 * margin;
-                const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-                // Check if new page is needed
-                if (yOffset + imgHeight + margin > doc.internal.pageSize.getHeight()) {
-                    doc.addPage();
-                    yOffset = margin;
+                    letterRendering: true,
+                    dpi: 300 // High DPI for print quality
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    putTotalPages: true
                 }
+            };
 
-                doc.addImage(imgData, 'JPEG', margin, yOffset, imgWidth, imgHeight);
-                yOffset += imgHeight + 10;
+            // Create a temporary container to respect vendor selection
+            const tempContainer = document.createElement('div');
+            tempContainer.style.padding = '10mm';
+            tempContainer.style.backgroundColor = '#fff';
+            tempContainer.innerHTML = `<h1 style="font-family: Montserrat; color: #008000; text-align: center;">${document.getElementById('header-title').textContent}</h1>`;
+            
+            // Clone and filter sections
+            const sections = tab.querySelectorAll('h2, p, .vendor-select, .filter, table');
+            sections.forEach(section => {
+                const clone = section.cloneNode(true);
+                if (clone.tagName === 'TABLE') {
+                    const tableId = clone.id;
+                    const vendorSelect = tab.querySelector(`#vendor${tableId.replace('Table', '')}`);
+                    const selectedVendor = vendorSelect ? vendorSelect.value : 'all';
+                    if (selectedVendor !== 'all') {
+                        const headers = clone.getElementsByTagName('th');
+                        const rows = clone.getElementsByTagName('tr');
+                        let vendorIndex = -1;
+                        for (let i = 0; i < headers.length; i++) {
+                            if (headers[i].textContent === selectedVendor) {
+                                vendorIndex = i;
+                                break;
+                            }
+                        }
+                        for (let j = 0; j < headers.length; j++) {
+                            headers[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                        }
+                        for (let i = 1; i < rows.length; i++) {
+                            const cells = rows[i].getElementsByTagName('td');
+                            for (let j = 0; j < cells.length; j++) {
+                                cells[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                            }
+                        }
+                    }
+                }
+                tempContainer.appendChild(clone);
+            });
 
-                // Clean up
-                document.body.removeChild(tempContainer);
-            }
+            // Append to body temporarily
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.top = '-9999px';
+            document.body.appendChild(tempContainer);
 
-            doc.save('EnergyLogserver_Battlecard.pdf');
+            // Export to PDF
+            await html2pdf().set(opt).from(tempContainer).save();
+
+            // Clean up
+            document.body.removeChild(tempContainer);
         }
 
         document.getElementById("defaultOpen").click();
