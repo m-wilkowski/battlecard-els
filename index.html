@@ -94,7 +94,7 @@
             color: white;
         }
         tr:nth-child(even) {
-            background-color: #fff9c4;
+            background-color: #fff9c4; /* Less vibrant yellow */
         }
         .cta-button {
             display: block;
@@ -179,7 +179,8 @@
             .cta-button { padding: 8px 15px; font-size: 14px; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -646,43 +647,43 @@
         }
 
         async function exportToPDF(tabName) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
             const tab = document.getElementById(tabName);
-            const opt = {
-                margin: [10, 10, 10, 10], // Top, Right, Bottom, Left
-                filename: 'EnergyLogserver_Battlecard.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, // Moderate scale for clarity
-                    useCORS: true, 
-                    logging: false,
-                    letterRendering: true,
-                    dpi: 300 // High DPI for print quality
-                },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait',
-                    putTotalPages: true
-                }
-            };
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 10;
+            let yOffset = margin;
 
-            // Create a temporary container to respect vendor selection
-            const tempContainer = document.createElement('div');
-            tempContainer.style.padding = '10mm';
-            tempContainer.style.backgroundColor = '#fff';
-            tempContainer.innerHTML = `<h1 style="font-family: Montserrat; color: #008000; text-align: center;">${document.getElementById('header-title').textContent}</h1>`;
-            
-            // Clone and filter sections
-            const sections = tab.querySelectorAll('h2, p, .vendor-select, .filter, table');
-            sections.forEach(section => {
-                const clone = section.cloneNode(true);
-                if (clone.tagName === 'TABLE') {
-                    const tableId = clone.id;
-                    const vendorSelect = tab.querySelector(`#vendor${tableId.replace('Table', '')}`);
+            // Add title
+            doc.setFont('helvetica', 'bold'); // Use Helvetica as a fallback
+            doc.setFontSize(16);
+            doc.text(document.getElementById('header-title').textContent, margin, yOffset);
+            yOffset += 10;
+
+            // Process sections (h2, p, tables)
+            const sections = tab.querySelectorAll('h2, p, table');
+            for (let section of sections) {
+                const tempContainer = document.createElement('div');
+                tempContainer.style.padding = '5px';
+                tempContainer.style.backgroundColor = '#fff';
+                tempContainer.style.width = `${pageWidth - 2 * margin}mm`;
+
+                if (section.tagName === 'H2' || section.tagName === 'P') {
+                    tempContainer.innerHTML = section.outerHTML;
+                } else if (section.tagName === 'TABLE') {
+                    const tableId = section.id;
+                    const vendorSelect = document.getElementById('vendor' + tableId.replace('Table', ''));
                     const selectedVendor = vendorSelect ? vendorSelect.value : 'all';
+                    const tempTable = section.cloneNode(true);
+
+                    // Apply vendor filter
                     if (selectedVendor !== 'all') {
-                        const headers = clone.getElementsByTagName('th');
-                        const rows = clone.getElementsByTagName('tr');
+                        const headers = tempTable.getElementsByTagName('th');
+                        const rows = tempTable.getElementsByTagName('tr');
                         let vendorIndex = -1;
                         for (let i = 0; i < headers.length; i++) {
                             if (headers[i].textContent === selectedVendor) {
@@ -700,20 +701,44 @@
                             }
                         }
                     }
+
+                    tempContainer.appendChild(tempTable);
                 }
-                tempContainer.appendChild(clone);
-            });
 
-            // Append to body temporarily
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.top = '-9999px';
-            document.body.appendChild(tempContainer);
+                // Append to body temporarily
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.top = '-9999px';
+                document.body.appendChild(tempContainer);
 
-            // Export to PDF
-            await html2pdf().set(opt).from(tempContainer).save();
+                // Capture as canvas
+                const canvas = await html2canvas(tempContainer, {
+                    scale: 3, // High resolution
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: tempContainer.offsetWidth,
+                    height: tempContainer.offsetHeight
+                });
 
-            // Clean up
-            document.body.removeChild(tempContainer);
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const imgProps = doc.getImageProperties(imgData);
+                const imgWidth = pageWidth - 2 * margin;
+                const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+                // Check for page break
+                if (yOffset + imgHeight + margin > doc.internal.pageSize.getHeight()) {
+                    doc.addPage();
+                    yOffset = margin;
+                }
+
+                doc.addImage(imgData, 'JPEG', margin, yOffset, imgWidth, imgHeight);
+                yOffset += imgHeight + 5;
+
+                // Clean up
+                document.body.removeChild(tempContainer);
+            }
+
+            doc.save('EnergyLogserver_Battlecard.pdf');
         }
 
         document.getElementById("defaultOpen").click();
