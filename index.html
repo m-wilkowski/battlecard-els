@@ -76,7 +76,7 @@
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             animation: fadeInTab 0.5s ease-in;
-            border: 1px solid transparent; /* Gradient border */
+            border: 1px solid transparent;
             background-image: linear-gradient(white, white), linear-gradient(to right, #00cc00, #008000);
             background-origin: border-box;
             background-clip: padding-box, border-box;
@@ -95,7 +95,7 @@
             transition: background-color 0.2s;
         }
         th {
-            background: linear-gradient(to bottom, #008000, #006400); /* Gradient header */
+            background: linear-gradient(to bottom, #008000, #006400);
             color: white;
         }
         tr:nth-child(even) {
@@ -122,7 +122,7 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .cta-button:hover {
-            transform: scale(1.05) rotate(2deg); /* Slight rotation */
+            transform: scale(1.05) rotate(2deg);
             box-shadow: 0 5px 15px rgba(0, 128, 0, 0.3);
         }
         .filter, .vendor-select {
@@ -215,44 +215,48 @@
             .cta-button { padding: 8px 15px; font-size: 14px; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="header-title">
-                <h1 id="header-title">EnergyLogserver – Battlecard SIEM</h1>
+                <h1 id="header-title" data-pl="EnergyLogserver – Battlecard SIEM" data-en="EnergyLogserver – SIEM Battlecard">EnergyLogserver – Battlecard SIEM</h1>
             </div>
             <img src="ELS_dark.png" alt="EnergyLogserver Logo" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <div style="display:none;">Logo EnergyLogserver</div>
+            <div style="display:none;" data-pl="Logo EnergyLogserver" data-en="EnergyLogserver Logo">Logo EnergyLogserver</div>
         </div>
 
         <div class="language-switch">
-            <a href="#" onclick="switchLanguage('pl')" class="lang-pl active">Polski</a> |
-            <a href="#" onclick="switchLanguage('en')" class="lang-en">English</a>
+            <a href="#" onclick="switchLanguage('pl')" class="lang-pl active" data-pl="Polski" data-en="Polish">Polski</a> |
+            <a href="#" onclick="switchLanguage('en')" class="lang-en" data-pl="Angielski" data-en="English">English</a>
         </div>
 
         <div class="tab">
-            <button class="tablinks" onclick="openTab(event, 'Marketing')" id="defaultOpen">Marketingowy</button>
-            <button class="tablinks" onclick="openTab(event, 'Techniczny')">Techniczny</button>
+            <button class="tablinks" onclick="openTab(event, 'Marketing')" id="defaultOpen" data-pl="Marketingowy" data-en="Marketing">Marketingowy</button>
+            <button class="tablinks" onclick="openTab(event, 'Techniczny')" data-pl="Techniczny" data-en="Technical">Techniczny</button>
         </div>
 
         <!-- Battlecard Marketingowy -->
         <div id="Marketing" class="tabcontent">
-            <h2 data-pl="1. Opis Rozwiązania" data-en="1. Solution Overview"></h2>
+            <h2 data-pl="1. Opis Rozwiązania" data-en="1. Solution Overview">1. Opis Rozwiązania</h2>
             <p data-pl="EnergyLogserver to nowoczesny SIEM łączący analizę zagrożeń w czasie rzeczywistym, intuicyjne dashboardy i pełne wsparcie techniczne w języku polskim. Idealny dla firm każdej wielkości, oferujący niskie TCO, szybkie wdrożenie oraz zaawansowaną automatyzację dzięki natywnej integracji z SOAR, XDR i UEBA." 
-               data-en="EnergyLogserver is a modern SIEM combining real-time threat analysis, intuitive dashboards, and full technical support in Polish. Ideal for companies of all sizes, offering low TCO, rapid deployment, and advanced automation through native integration with SOAR, XDR, and UEBA."></p>
+               data-en="EnergyLogserver is a modern SIEM combining real-time threat analysis, intuitive dashboards, and full technical support in Polish. Ideal for companies of all sizes, offering low TCO, rapid deployment, and advanced automation through native integration with SOAR, XDR, and UEBA.">
+                EnergyLogserver to nowoczesny SIEM łączący analizę zagrożeń w czasie rzeczywistym, intuicyjne dashboardy i pełne wsparcie techniczne w języku polskim. Idealny dla firm każdej wielkości, oferujący niskie TCO, szybkie wdrożenie oraz zaawansowaną automatyzację dzięki natywnej integracji z SOAR, XDR i UEBA.
+            </p>
             <hr class="section-divider">
 
-            <h2 data-pl="2. Pozycjonowanie Rynkowe" data-en="2. Market Positioning"></h2>
+            <h2 data-pl="2. Pozycjonowanie Rynkowe" data-en="2. Market Positioning">2. Pozycjonowanie Rynkowe</h2>
             <p data-pl="Dla kogo: Małe i średnie przedsiębiorstwa (MSP), sektor finansowy, przemysłowy, administracja publiczna.<br>Klienci: Lokalne banki, firmy produkcyjne, dostawcy usług IT.<br>Konkurencja: EnergyLogserver rośnie w Polsce dzięki lokalnemu wsparciu, niższym kosztom i elastyczności." 
-               data-en="Target Audience: Small and medium enterprises (SMEs), financial sector, industrial sector, public administration.<br>Clients: Local banks, manufacturing companies, IT service providers.<br>Competition: EnergyLogserver is growing in Poland due to local support, lower costs, and flexibility."></p>
+               data-en="Target Audience: Small and medium enterprises (SMEs), financial sector, industrial sector, public administration.<br>Clients: Local banks, manufacturing companies, IT service providers.<br>Competition: EnergyLogserver is growing in Poland due to local support, lower costs, and flexibility.">
+                Dla kogo: Małe i średnie przedsiębiorstwa (MSP), sektor finansowy, przemysłowy, administracja publiczna.<br>Klienci: Lokalne banki, firmy produkcyjne, dostawcy usług IT.<br>Konkurencja: EnergyLogserver rośnie w Polsce dzięki lokalnemu wsparciu, niższym kosztom i elastyczności.
+            </p>
             <hr class="section-divider">
 
-            <h2 data-pl="3. Kluczowe Przewagi" data-en="3. Key Advantages"></h2>
+            <h2 data-pl="3. Kluczowe Przewagi" data-en="3. Key Advantages">3. Kluczowe Przewagi</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorMarketing" onchange="updateVendorTable('marketingTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -263,14 +267,14 @@
                 </select>
             </div>
             <div class="filter">
-                <label><input type="checkbox" checked onchange="filterTable('marketingTable', this)" data-pl="Pokaż wszystko" data-en="Show all"> <span>Pokaż wszystko</span></label>
-                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 1)" data-pl="Licencjonowanie" data-en="Licensing"> <span>Licencjonowanie</span></label>
-                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 2)" data-pl="Wsparcie" data-en="Support"> <span>Wsparcie</span></label>
-                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 6)" data-pl="SOAR" data-en="SOAR"> <span>SOAR</span></label>
+                <label><input type="checkbox" checked onchange="filterTable('marketingTable', this)" data-pl="Pokaż wszystko" data-en="Show all"> <span data-pl="Pokaż wszystko" data-en="Show all">Pokaż wszystko</span></label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 1)" data-pl="Licencjonowanie" data-en="Licensing"> <span data-pl="Licencjonowanie" data-en="Licensing">Licencjonowanie</span></label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 2)" data-pl="Wsparcie" data-en="Support"> <span data-pl="Wsparcie" data-en="Support">Wsparcie</span></label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 6)" data-pl="SOAR" data-en="SOAR"> <span data-pl="SOAR" data-en="SOAR">SOAR</span></label>
             </div>
             <table id="marketingTable">
                 <tr>
-                    <th data-pl="Cecha" data-en="Feature"></th>
+                    <th data-pl="Cecha" data-en="Feature">Cecha</th>
                     <th>EnergyLogserver</th>
                     <th>Splunk</th>
                     <th>QRadar</th>
@@ -293,9 +297,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="4. Kluczowe Korzyści Biznesowe" data-en="4. Key Business Benefits"></h2>
+            <h2 data-pl="4. Kluczowe Korzyści Biznesowe" data-en="4. Key Business Benefits">4. Kluczowe Korzyści Biznesowe</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorBenefits" onchange="updateVendorTable('benefitsTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -307,7 +311,7 @@
             </div>
             <table id="benefitsTable">
                 <tr>
-                    <th data-pl="Korzyść" data-en="Benefit"></th>
+                    <th data-pl="Korzyść" data-en="Benefit">Korzyść</th>
                     <th>EnergyLogserver</th>
                     <th>Splunk</th>
                     <th>QRadar</th>
@@ -324,9 +328,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="5. Opinie Użytkowników" data-en="5. User Reviews"></h2>
+            <h2 data-pl="5. Opinie Użytkowników" data-en="5. User Reviews">5. Opinie Użytkowników</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorReviews" onchange="updateVendorTable('reviewsTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -338,9 +342,9 @@
             </div>
             <table id="reviewsTable">
                 <tr>
-                    <th data-pl="Rozwiązanie" data-en="Solution"></th>
-                    <th data-pl="Chwalone" data-en="Praised"></th>
-                    <th data-pl="Krytyka" data-en="Criticism"></th>
+                    <th data-pl="Rozwiązanie" data-en="Solution">Rozwiązanie</th>
+                    <th data-pl="Chwalone" data-en="Praised">Chwalone</th>
+                    <th data-pl="Krytyka" data-en="Criticism">Krytyka</th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td data-pl="Szybkie wdrożenie, support PL" data-en="Fast deployment, PL support">Szybkie wdrożenie, support PL</td><td data-pl="Mniejsza rozpoznawalność" data-en="Lower brand recognition">Mniejsza rozpoznawalność</td></tr>
                 <tr><td>Splunk</td><td>Analityka</td><td>Koszty, złożoność</td></tr>
@@ -351,9 +355,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="6. Unikalne Funkcjonalności" data-en="6. Unique Functionalities"></h2>
+            <h2 data-pl="6. Unikalne Funkcjonalności" data-en="6. Unique Functionalities">6. Unikalne Funkcjonalności</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorFeatures" onchange="updateVendorTable('featuresTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -366,7 +370,7 @@
             <table id="featuresTable">
                 <tr>
                     <th>EnergyLogserver</th>
-                    <th data-pl="Funkcjonalność" data-en="Functionality"></th>
+                    <th data-pl="Funkcjonalność" data-en="Functionality">Funkcjonalność</th>
                     <th>Splunk</th>
                     <th>QRadar</th>
                     <th>Sentinel</th>
@@ -385,9 +389,9 @@
 
         <!-- Battlecard Techniczny -->
         <div id="Techniczny" class="tabcontent">
-            <h2 data-pl="1. Architektura Systemu" data-en="1. System Architecture"></h2>
+            <h2 data-pl="1. Architektura Systemu" data-en="1. System Architecture">1. Architektura Systemu</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorArchitecture" onchange="updateVendorTable('architectureTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -399,8 +403,8 @@
             </div>
             <table id="architectureTable">
                 <tr>
-                    <th data-pl="Rozwiązanie" data-en="Solution"></th>
-                    <th data-pl="Architektura" data-en="Architecture"></th>
+                    <th data-pl="Rozwiązanie" data-en="Solution">Rozwiązanie</th>
+                    <th data-pl="Architektura" data-en="Architecture">Architektura</th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td data-pl="Elasticsearch, Logstash, Kibana + GUI, wsparcie UEBA" data-en="Elasticsearch, Logstash, Kibana + GUI, UEBA support">Elasticsearch, Logstash, Kibana + GUI, wsparcie UEBA</td></tr>
                 <tr><td>Splunk</td><td>Własny silnik, wymaga dodatków</td></tr>
@@ -411,9 +415,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="2. Kluczowe Przewagi" data-en="2. Key Advantages"></h2>
+            <h2 data-pl="2. Kluczowe Przewagi" data-en="2. Key Advantages">2. Kluczowe Przewagi</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorTechnical" onchange="updateVendorTable('technicalTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -424,13 +428,13 @@
                 </select>
             </div>
             <div class="filter">
-                <label><input type="checkbox" checked onchange="filterTable('technicalTable', this)" data-pl="Pokaż wszystko" data-en="Show all"> <span>Pokaż wszystko</span></label>
-                <label><input type="checkbox" onchange="filterTable('technicalTable', this, 1)" data-pl="Parsing Out-of-Box" data-en="Out-of-Box Parsing"> <span>Parsing Out-of-Box</span></label>
-                <label><input type="checkbox" onchange="filterTable('technicalTable', this, 7)" data-pl="SOAR" data-en="SOAR"> <span>SOAR</span></label>
+                <label><input type="checkbox" checked onchange="filterTable('technicalTable', this)" data-pl="Pokaż wszystko" data-en="Show all"> <span data-pl="Pokaż wszystko" data-en="Show all">Pokaż wszystko</span></label>
+                <label><input type="checkbox" onchange="filterTable('technicalTable', this, 1)" data-pl="Parsing Out-of-Box" data-en="Out-of-Box Parsing"> <span data-pl="Parsing Out-of-Box" data-en="Out-of-Box Parsing">Parsing Out-of-Box</span></label>
+                <label><input type="checkbox" onchange="filterTable('technicalTable', this, 7)" data-pl="SOAR" data-en="SOAR"> <span data-pl="SOAR" data-en="SOAR">SOAR</span></label>
             </div>
             <table id="technicalTable">
                 <tr>
-                    <th data-pl="Cecha" data-en="Feature"></th>
+                    <th data-pl="Cecha" data-en="Feature">Cecha</th>
                     <th>EnergyLogserver</th>
                     <th>Splunk</th>
                     <th>QRadar</th>
@@ -456,9 +460,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="3. Wymagania i Skalowalność" data-en="3. Requirements and Scalability"></h2>
+            <h2 data-pl="3. Wymagania i Skalowalność" data-en="3. Requirements and Scalability">3. Wymagania i Skalowalność</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorRequirements" onchange="updateVendorTable('requirementsTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -470,10 +474,10 @@
             </div>
             <table id="requirementsTable">
                 <tr>
-                    <th data-pl="Rozwiązanie" data-en="Solution"></th>
-                    <th data-pl="Wymagania Min." data-en="Min. Requirements"></th>
-                    <th data-pl="Skalowalność" data-en="Scalability"></th>
-                    <th data-pl="Ograniczenia Wydajnościowe" data-en="Performance Limitations"></th>
+                    <th data-pl="Rozwiązanie" data-en="Solution">Rozwiązanie</th>
+                    <th data-pl="Wymagania Min." data-en="Min. Requirements">Wymagania Min.</th>
+                    <th data-pl="Skalowalność" data-en="Scalability">Skalowalność</th>
+                    <th data-pl="Ograniczenia Wydajnościowe" data-en="Performance Limitations">Ograniczenia Wydajnościowe</th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td>8 CPU, 16 GB RAM</td><td data-pl="Klaster Elasticsearch" data-en="Elasticsearch Cluster">Klaster Elasticsearch</td><td data-pl="Brak limitu EPS" data-en="No EPS limit">Brak limitu EPS</td></tr>
                 <tr><td>Splunk</td><td>12 CPU, 24vCPU, 12 GB RAM (<a href="https://docs.splunk.com/Documentation/Splunk/latest/Capacity/Referencehardware">źródło</a>)</td><td>Licencja GB/dzień</td><td>Limit GB/dzień</td></tr>
@@ -484,9 +488,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="4. Integracje z Ekosystemem" data-en="4. Ecosystem Integrations"></h2>
+            <h2 data-pl="4. Integracje z Ekosystemem" data-en="4. Ecosystem Integrations">4. Integracje z Ekosystemem</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorIntegrations" onchange="updateVendorTable('integrationsTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -498,8 +502,8 @@
             </div>
             <table id="integrationsTable">
                 <tr>
-                    <th data-pl="Rozwiązanie" data-en="Solution"></th>
-                    <th data-pl="Integracje" data-en="Integrations"></th>
+                    <th data-pl="Rozwiązanie" data-en="Solution">Rozwiązanie</th>
+                    <th data-pl="Integracje" data-en="Integrations">Integracje</th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td data-pl="SOAR, XDR, UEBA, chmura hybrydowa" data-en="SOAR, XDR, UEBA, hybrid cloud">SOAR, XDR, UEBA, chmura hybrydowa</td></tr>
                 <tr><td>Splunk</td><td>MISP + ES App</td></tr>
@@ -510,9 +514,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="5. Integracje Threat Intelligence" data-en="5. Threat Intelligence Integrations"></h2>
+            <h2 data-pl="5. Integracje Threat Intelligence" data-en="5. Threat Intelligence Integrations">5. Integracje Threat Intelligence</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorThreat" onchange="updateVendorTable('threatTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -524,8 +528,8 @@
             </div>
             <table id="threatTable">
                 <tr>
-                    <th data-pl="Rozwiązanie" data-en="Solution"></th>
-                    <th data-pl="Threat Intelligence" data-en="Threat Intelligence"></th>
+                    <th data-pl="Rozwiązanie" data-en="Solution">Rozwiązanie</th>
+                    <th data-pl="Threat Intelligence" data-en="Threat Intelligence">Threat Intelligence</th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td data-pl="MISP + Energy Feeds (150+)" data-en="MISP + Energy Feeds (150+)">MISP + Energy Feeds (150+)</td></tr>
                 <tr><td>Splunk</td><td>MISP + ES App</td></tr>
@@ -536,9 +540,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="6. API i Rozszerzalność" data-en="6. API and Extensibility"></h2>
+            <h2 data-pl="6. API i Rozszerzalność" data-en="6. API and Extensibility">6. API i Rozszerzalność</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorApi" onchange="updateVendorTable('apiTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -550,8 +554,8 @@
             </div>
             <table id="apiTable">
                 <tr>
-                    <th data-pl="Rozwiązanie" data-en="Solution"></th>
-                    <th data-pl="API i Rozszerzalność" data-en="API and Extensibility"></th>
+                    <th data-pl="Rozwiązanie" data-en="Solution">Rozwiązanie</th>
+                    <th data-pl="API i Rozszerzalność" data-en="API and Extensibility">API i Rozszerzalność</th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td data-pl="REST API, otwarty interfejs" data-en="REST API, open interface">REST API, otwarty interfejs</td></tr>
                 <tr><td>Splunk</td><td>API, mniej elastyczne</td></tr>
@@ -562,9 +566,9 @@
             </table>
             <hr class="section-divider">
 
-            <h2 data-pl="7. Benchmark Wydajnościowy" data-en="7. Performance Benchmark"></h2>
+            <h2 data-pl="7. Benchmark Wydajnościowy" data-en="7. Performance Benchmark">7. Benchmark Wydajnościowy</h2>
             <div class="vendor-select">
-                <label data-pl="Porównaj z:" data-en="Compare with:"></label>
+                <label data-pl="Porównaj z:" data-en="Compare with:">Porównaj z:</label>
                 <select id="vendorBenchmark" onchange="updateVendorTable('benchmarkTable', this.value)">
                     <option value="all" data-pl="Wszyscy" data-en="All">Wszyscy</option>
                     <option value="Splunk">Splunk</option>
@@ -576,10 +580,10 @@
             </div>
             <table id="benchmarkTable">
                 <tr>
-                    <th data-pl="Rozwiązanie" data-en="Solution"></th>
-                    <th data-pl="EPS" data-en="EPS"></th>
-                    <th data-pl="Opóźnienie" data-en="Latency"></th>
-                    <th data-pl="Zużycie RAM (10k EPS)" data-en="RAM Usage (10k EPS)"></th>
+                    <th data-pl="Rozwiązanie" data-en="Solution">Rozwiązanie</th>
+                    <th data-pl="EPS" data-en="EPS">EPS</th>
+                    <th data-pl="Opóźnienie" data-en="Latency">Opóźnienie</th>
+                    <th data-pl="Zużycie RAM (10k EPS)" data-en="RAM Usage (10k EPS)">Zużycie RAM (10k EPS)</th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td>100k</td><td><1s</td><td>8 GB</td></tr>
                 <tr><td>Splunk</td><td>50-100k</td><td>Zależy od sprzętu</td><td>12 GB</td></tr>
@@ -695,138 +699,92 @@
             }
         }
 
-        function exportToPDF(tabName) {
+        async function exportToPDF(tabName) {
+            const { jsPDF } = window.jspdf;
             const tab = document.getElementById(tabName);
-            const docDefinition = {
-                pageSize: 'A4',
-                pageMargins: [20, 20, 20, 20],
-                content: [],
-                styles: {
-                    header: {
-                        fontSize: 16,
-                        bold: true,
-                        margin: [0, 0, 0, 10],
-                        color: '#008000'
-                    },
-                    subheader: {
-                        fontSize: 14,
-                        bold: true,
-                        margin: [0, 10, 0, 5],
-                        color: '#008000'
-                    },
-                    text: {
-                        fontSize: 12,
-                        margin: [0, 0, 0, 10]
-                    },
-                    table: {
-                        fontSize: 10,
-                        margin: [0, 5, 0, 15]
-                    },
-                    tableHeader: {
-                        bold: true,
-                        fillColor: '#008000',
-                        color: 'white'
-                    },
-                    tableRowEven: {
-                        fillColor: '#fff9c4'
+            
+            // Temporarily show all content for rendering
+            const hiddenElements = tab.querySelectorAll('[style*="display: none"]');
+            hiddenElements.forEach(el => {
+                el.style.display = 'block';
+            });
+
+            // Ensure the tab content is fully rendered
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            try {
+                // Capture the tab content as a canvas with higher resolution
+                const canvas = await html2canvas(tab, {
+                    scale: 4, // Increased scale for better resolution
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: true,
+                    width: tab.scrollWidth,
+                    height: tab.scrollHeight,
+                    windowWidth: document.documentElement.offsetWidth,
+                    windowHeight: document.documentElement.offsetHeight,
+                    imageTimeout: 15000 // Increased timeout for rendering
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 1.0); // Use JPEG for better quality
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4',
+                    compress: false // Disable compression for better quality
+                });
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 10;
+                const imgWidth = pageWidth - 2 * margin;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                let yOffset = margin;
+                let remainingHeight = imgHeight;
+
+                // Split the content across multiple pages if necessary
+                while (remainingHeight > 0) {
+                    const currentPageHeight = Math.min(remainingHeight, pageHeight - 2 * margin);
+                    const sourceY = (imgHeight - remainingHeight) * canvas.height / imgHeight;
+
+                    doc.addImage(
+                        imgData,
+                        'JPEG',
+                        margin,
+                        yOffset,
+                        imgWidth,
+                        currentPageHeight,
+                        undefined,
+                        'NONE', // No compression
+                        0,
+                        sourceY / canvas.height * imgHeight,
+                        imgWidth,
+                        currentPageHeight
+                    );
+
+                    remainingHeight -= currentPageHeight;
+                    if (remainingHeight > 0) {
+                        doc.addPage();
+                        yOffset = margin;
                     }
-                },
-                defaultStyle: {
-                    font: 'Helvetica' // Fallback font
                 }
-            };
 
-            // Add title
-            docDefinition.content.push({
-                text: document.getElementById('header-title').textContent,
-                style: 'header',
-                alignment: 'center'
-            });
-
-            // Process sections
-            const sections = tab.querySelectorAll('h2, p, .vendor-select, .filter, table');
-            sections.forEach(section => {
-                if (section.tagName === 'H2') {
-                    docDefinition.content.push({
-                        text: section.textContent,
-                        style: 'subheader'
-                    });
-                } else if (section.tagName === 'P') {
-                    docDefinition.content.push({
-                        text: section.textContent,
-                        style: 'text'
-                    });
-                } else if (section.classList.contains('vendor-select')) {
-                    const select = section.querySelector('select');
-                    docDefinition.content.push({
-                        text: `${section.querySelector('label').textContent} ${select.options[select.selectedIndex].text}`,
-                        style: 'text'
-                    });
-                } else if (section.classList.contains('filter')) {
-                    const checkboxes = section.querySelectorAll('input[type="checkbox"]:checked');
-                    const labels = Array.from(checkboxes).map(cb => cb.nextElementSibling.textContent).join(', ');
-                    docDefinition.content.push({
-                        text: `Filtry: ${labels || 'Brak'}`,
-                        style: 'text'
-                    });
-                } else if (section.tagName === 'TABLE') {
-                    const tableId = section.id;
-                    const vendorSelect = document.getElementById('vendor' + tableId.replace('Table', ''));
-                    const selectedVendor = vendorSelect ? vendorSelect.value : 'all';
-
-                    // Extract table data
-                    const headers = section.querySelectorAll('th');
-                    const rows = section.querySelectorAll('tr');
-                    const tableData = [];
-                    const headerRow = [];
-
-                    // Headers
-                    Array.from(headers).forEach((header, index) => {
-                        if (selectedVendor === 'all' || index === 0 || index === 1 || header.textContent === selectedVendor) {
-                            headerRow.push({
-                                text: header.textContent,
-                                style: 'tableHeader'
-                            });
-                        }
-                    });
-                    tableData.push(headerRow);
-
-                    // Rows
-                    Array.from(rows).slice(1).forEach(row => {
-                        if (row.style.display !== 'none') { // Respect filtered rows
-                            const cells = row.querySelectorAll('td');
-                            const rowData = [];
-                            Array.from(cells).forEach((cell, index) => {
-                                if (selectedVendor === 'all' || index === 0 || index === 1 || headers[index].textContent === selectedVendor) {
-                                    rowData.push(cell.textContent);
-                                }
-                            });
-                            tableData.push(rowData);
-                        }
-                    });
-
-                    // Add table to PDF
-                    docDefinition.content.push({
-                        table: {
-                            headerRows: 1,
-                            widths: headerRow.map(() => '*'),
-                            body: tableData
-                        },
-                        layout: {
-                            fillColor: function (rowIndex) {
-                                return rowIndex % 2 === 1 ? '#fff9c4' : null;
-                            },
-                            hLineColor: '#ddd',
-                            vLineColor: '#ddd'
-                        },
-                        style: 'table'
-                    });
-                }
-            });
-
-            // Generate PDF
-            pdfMake.createPdf(docDefinition).download('EnergyLogserver_Battlecard.pdf');
+                // Save the PDF
+                doc.save('EnergyLogserver_Battlecard.pdf');
+            } catch (error) {
+                console.error('Failed to generate PDF:', error);
+                alert('Błąd podczas generowania PDF. Sprawdź konsolę przeglądarki.');
+            } finally {
+                // Restore hidden elements
+                hiddenElements.forEach(el => {
+                    el.style.display = 'none';
+                });
+            }
         }
+
+        // Initialize the page in Polish
+        switchLanguage('pl');
 
         document.getElementById("defaultOpen").click();
         updateVendorTable('marketingTable', 'all');
