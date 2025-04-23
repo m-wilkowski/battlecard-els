@@ -215,8 +215,8 @@
             .cta-button { padding: 8px 15px; font-size: 14px; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -480,7 +480,7 @@
                     <th data-pl="Ograniczenia Wydajnościowe" data-en="Performance Limitations">Ograniczenia Wydajnościowe</th>
                 </tr>
                 <tr><td>EnergyLogserver</td><td>8 CPU, 16 GB RAM</td><td data-pl="Klaster Elasticsearch" data-en="Elasticsearch Cluster">Klaster Elasticsearch</td><td data-pl="Brak limitu EPS" data-en="No EPS limit">Brak limitu EPS</td></tr>
-                <tr><td>Splunk</td><td>12 CPU, 24vCPU, 12 GB RAM (<a href="https://docs.splunk.com/Documentation/Splunk/latest/Capacity/Referencehardware">źródło</a>)</td><td>Licencja GB/dzień</td><td>Limit GB/dzień</td></tr>
+                <tr><td>Splunk</td><td>12 CPU, 24vCPU, 12 GB RAM</td><td>Licencja GB/dzień</td><td>Limit GB/dzień</td></tr>
                 <tr><td>QRadar</td><td>16 CPU, 64 GB RAM</td><td>Dedykowane HA</td><td>Wysokie zużycie zasobów</td></tr>
                 <tr><td>Sentinel</td><td>Chmura Azure</td><td>Elastyczna</td><td>Zależna od Azure</td></tr>
                 <tr><td>FortiSIEM</td><td>12 CPU, 24 GB RAM</td><td>Multi-tenant</td><td>~50k EPS/kolektor</td></tr>
@@ -699,88 +699,164 @@
             }
         }
 
-        async function exportToPDF(tabName) {
+        function exportToPDF(tabName) {
             const { jsPDF } = window.jspdf;
-            const tab = document.getElementById(tabName);
-            
-            // Temporarily show all content for rendering
-            const hiddenElements = tab.querySelectorAll('[style*="display: none"]');
-            hiddenElements.forEach(el => {
-                el.style.display = 'block';
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
             });
 
-            // Ensure the tab content is fully rendered
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // Set font to Times for better Polish character support
+            doc.setFont("times");
 
-            try {
-                // Capture the tab content as a canvas with higher resolution
-                const canvas = await html2canvas(tab, {
-                    scale: 4, // Increased scale for better resolution
-                    useCORS: true,
-                    backgroundColor: '#ffffff',
-                    logging: true,
-                    width: tab.scrollWidth,
-                    height: tab.scrollHeight,
-                    windowWidth: document.documentElement.offsetWidth,
-                    windowHeight: document.documentElement.offsetHeight,
-                    imageTimeout: 15000 // Increased timeout for rendering
-                });
+            // Margins and initial position
+            const margin = 10;
+            let yPosition = margin;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const maxWidth = pageWidth - 2 * margin;
 
-                const imgData = canvas.toDataURL('image/jpeg', 1.0); // Use JPEG for better quality
-                const doc = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'mm',
-                    format: 'a4',
-                    compress: false // Disable compression for better quality
-                });
-
-                const pageWidth = doc.internal.pageSize.getWidth();
+            // Function to add a new page if needed
+            const addNewPageIfNeeded = (height) => {
                 const pageHeight = doc.internal.pageSize.getHeight();
-                const margin = 10;
-                const imgWidth = pageWidth - 2 * margin;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                if (yPosition + height > pageHeight - margin) {
+                    doc.addPage();
+                    yPosition = margin;
+                }
+            };
 
-                let yOffset = margin;
-                let remainingHeight = imgHeight;
+            // Function to add text with word wrap
+            const addText = (text, x, y, maxWidth, fontSize = 12, color = [0, 0, 0]) => {
+                doc.setFontSize(fontSize);
+                doc.setTextColor(...color);
+                const lines = doc.splitTextToSize(text, maxWidth);
+                addNewPageIfNeeded(lines.length * (fontSize / 2));
+                doc.text(lines, x, y);
+                doc.setTextColor(0, 0, 0); // Reset color
+                return lines.length * (fontSize / 2); // Approximate height of text
+            };
 
-                // Split the content across multiple pages if necessary
-                while (remainingHeight > 0) {
-                    const currentPageHeight = Math.min(remainingHeight, pageHeight - 2 * margin);
-                    const sourceY = (imgHeight - remainingHeight) * canvas.height / imgHeight;
+            // Function to draw a section divider
+            const drawSectionDivider = (y) => {
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(0, 204, 0); // Green color for the divider
+                doc.line(margin, y, pageWidth - margin, y);
+            };
 
-                    doc.addImage(
-                        imgData,
-                        'JPEG',
-                        margin,
-                        yOffset,
-                        imgWidth,
-                        currentPageHeight,
-                        undefined,
-                        'NONE', // No compression
-                        0,
-                        sourceY / canvas.height * imgHeight,
-                        imgWidth,
-                        currentPageHeight
-                    );
+            // Function to calculate dynamic column widths based on content
+            const calculateColumnWidths = (headers, tableData, totalWidth) => {
+                const widths = new Array(headers.length).fill(0);
+                const minWidth = 20; // Minimum width per column
+                const maxWidth = totalWidth / headers.length; // Maximum width per column
 
-                    remainingHeight -= currentPageHeight;
-                    if (remainingHeight > 0) {
-                        doc.addPage();
-                        yOffset = margin;
+                // Measure the width of each cell's content
+                for (let i = 0; i < headers.length; i++) {
+                    let maxCellWidth = doc.getTextWidth(headers[i]);
+                    for (let row of tableData) {
+                        const cellWidth = doc.getTextWidth(row[i] || '');
+                        maxCellWidth = Math.max(maxCellWidth, cellWidth);
                     }
+                    widths[i] = Math.min(Math.max(maxCellWidth * 1.2, minWidth), maxWidth);
                 }
 
-                // Save the PDF
-                doc.save('EnergyLogserver_Battlecard.pdf');
-            } catch (error) {
-                console.error('Failed to generate PDF:', error);
-                alert('Błąd podczas generowania PDF. Sprawdź konsolę przeglądarki.');
-            } finally {
-                // Restore hidden elements
-                hiddenElements.forEach(el => {
-                    el.style.display = 'none';
-                });
-            }
+                // Normalize widths to fit totalWidth
+                const totalCalculatedWidth = widths.reduce((sum, w) => sum + w, 0);
+                const scaleFactor = totalWidth / totalCalculatedWidth;
+                const normalizedWidths = widths.map(w => w * scaleFactor);
+
+                const columnStyles = {};
+                for (let i = 0; i < headers.length; i++) {
+                    columnStyles[i] = { cellWidth: normalizedWidths[i] };
+                }
+                return columnStyles;
+            };
+
+            // Extract content from the tab
+            const tab = document.getElementById(tabName);
+            const elements = tab.querySelectorAll('h2, p, table, .vendor-select');
+
+            elements.forEach(element => {
+                if (element.tagName === 'H2') {
+                    const text = element.textContent;
+                    const textHeight = addText(text, margin, yPosition, maxWidth, 14, [0, 128, 0]);
+                    yPosition += textHeight + 15;
+                } else if (element.tagName === 'P') {
+                    const text = element.textContent;
+                    const textHeight = addText(text, margin, yPosition, maxWidth, 11);
+                    yPosition += textHeight + 10;
+                } else if (element.classList.contains('vendor-select')) {
+                    const label = element.querySelector('label').textContent;
+                    const select = element.querySelector('select').value;
+                    const text = `${label} ${select}`;
+                    const textHeight = addText(text, margin, yPosition, maxWidth, 11);
+                    yPosition += textHeight + 8;
+                } else if (element.tagName === 'TABLE') {
+                    const tableId = element.id;
+                    const headers = Array.from(element.querySelectorAll('th')).map(th => th.textContent);
+                    const rows = Array.from(element.querySelectorAll('tr')).slice(1).filter(row => row.style.display !== 'none');
+                    const tableData = rows.map(row => Array.from(row.querySelectorAll('td')).map(cell => cell.textContent));
+
+                    // Calculate dynamic column widths
+                    const totalTableWidth = maxWidth;
+                    let columnStyles = calculateColumnWidths(headers, tableData, totalTableWidth);
+
+                    // Override for specific tables with known issues
+                    if (tableId === 'reviewsTable') {
+                        columnStyles[0] = { cellWidth: totalTableWidth * 0.2 };
+                        columnStyles[1] = { cellWidth: totalTableWidth * 0.4 };
+                        columnStyles[2] = { cellWidth: totalTableWidth * 0.4 };
+                    } else if (tableId === 'architectureTable' || tableId === 'integrationsTable' || tableId === 'threatTable' || tableId === 'apiTable') {
+                        columnStyles[0] = { cellWidth: totalTableWidth * 0.3 };
+                        columnStyles[1] = { cellWidth: totalTableWidth * 0.7 };
+                    } else if (tableId === 'requirementsTable' || tableId === 'benchmarkTable') {
+                        columnStyles[0] = { cellWidth: totalTableWidth * 0.2 };
+                        columnStyles[1] = { cellWidth: totalTableWidth * 0.3 };
+                        columnStyles[2] = { cellWidth: totalTableWidth * 0.25 };
+                        columnStyles[3] = { cellWidth: totalTableWidth * 0.25 };
+                    }
+
+                    // Add table using autoTable
+                    addNewPageIfNeeded(30); // Approximate height for table start
+                    doc.autoTable({
+                        startY: yPosition,
+                        head: [headers],
+                        body: tableData,
+                        theme: 'grid',
+                        styles: {
+                            font: 'times',
+                            fontSize: 11,
+                            textColor: [0, 0, 0],
+                            lineColor: [221, 221, 221],
+                            lineWidth: 0.3,
+                            cellPadding: 4,
+                            minCellHeight: 10,
+                            halign: 'center',
+                            valign: 'middle'
+                        },
+                        headStyles: {
+                            fillColor: [0, 100, 0], // Dark green for header
+                            textColor: [255, 255, 255],
+                            fontSize: 11,
+                            halign: 'center'
+                        },
+                        alternateRowStyles: {
+                            fillColor: [255, 249, 196] // Light yellow for even rows
+                        },
+                        columnStyles: columnStyles,
+                        margin: { left: margin, right: margin },
+                        didDrawPage: (data) => {
+                            yPosition = data.cursor.y + 20;
+                        }
+                    });
+
+                    // Draw a section divider after the table
+                    drawSectionDivider(yPosition);
+                    yPosition += 10;
+                }
+            });
+
+            // Save the PDF
+            doc.save('EnergyLogserver_Battlecard.pdf');
         }
 
         // Initialize the page in Polish
