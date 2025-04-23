@@ -294,6 +294,15 @@
                 <tr><td data-pl="Certyfikaty" data-en="Certifications">Certyfikaty</td><td>GDPR, SOC2</td><td>GDPR, SOC2, PCI DSS, HIPAA, FedRAMP</td><td>FedRAMP</td><td>SOC2</td><td>NSS Labs</td><td>KNF, RODO</td></tr>
                 <tr><td data-pl="Czas Reakcji Wsparcia" data-en="Support Response Time">Czas Reakcji Wsparcia</td><td><1h</td><td>30 min (Premium)</td><td>2h</td><td>Via Azure</td><td>4h</td><td><1h</td></tr>
                 <tr><td data-pl="Koszty Początkowe" data-en="Initial Costs">Koszty Początkowe</td><td>Niski</td><td>Wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Niski</td></tr>
+                <tr>
+                    <td data-pl="Baza Danych i OS" data-en="Database and OS">Baza Danych i OS</td>
+                    <td>Wbudowana (NoSQL)<br>Win/Linux/Chmura</td>
+                    <td>Wbudowana (Splunk Index)<br>Win/Linux/Chmura</td>
+                    <td>Wbudowana (NoSQL)<br>Win/Linux/Chmura</td>
+                    <td>Wbudowana (Azure Data Explorer)<br>Azure</td>
+                    <td>Wbudowana (NoSQL)<br>Win/Linux/Chmura</td>
+                    <td>Wbudowana (PostgreSQL, przypuszczenie)<br>Win/Linux</td>
+                </tr>
             </table>
             <hr class="section-divider">
 
@@ -378,8 +387,8 @@
                     <th>SecureVisio</th>
                 </tr>
                 <tr><td data-pl="Predykcja zagrożeń" data-en="Threat Prediction">Predykcja zagrożeń</td><td>Empowered AI</td><td>Splunk Machine Learning Toolkit</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
-                <tr><td data-pl="Analiza Netflow (50k Flow/s)" data-en="Netflow Analysis (50k Flow/s)">Analiza Netflow (50k Flow/s)</td><td>Network Probe</td><td>Splunk App for Stream</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
-                <tr><td data-pl="Dokumentacja IT" data-en="IT Documentation">Dokumentacja IT</td><td>e-Doc</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
+                <tr><td data-pl="Analiza Netflow (50k Flow/s)" data-en="Netflow Analysis (50k Flow/s)">Analiza Netflow (50k Flow/s)</td><td>Network Probe</td><td>Splunk App for Stream</td><td>TAK</td><td>Brak</td><td>TAK</td><td>Brak</td></tr>
+                <tr><td data-pl="Dokumentacja IT" data-en="IT Documentation">Dokumentacja IT</td><td>e-Doc</td><td>Płatne dodatki</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
                 <tr><td data-pl="Elastyczność" data-en="Flexibility">Elastyczność</td><td>Otwarty Interfejs</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Elastyczność</td></tr>
             </table>
             <hr class="section-divider">
@@ -406,7 +415,7 @@
                     <th data-pl="Rozwiązanie" data-en="Solution">Rozwiązanie</th>
                     <th data-pl="Architektura" data-en="Architecture">Architektura</th>
                 </tr>
-                <tr><td>EnergyLogserver</td><td data-pl="Elasticsearch, Logstash, Kibana + GUI, wsparcie UEBA" data-en="Elasticsearch, Logstash, Kibana + GUI, UEBA support">Elasticsearch, Logstash, Kibana + GUI, wsparcie UEBA</td></tr>
+                <tr><td>EnergyLogserver</td><td data-pl="Baza danych NoSQL + GUI, wsparcie UEBA" data-en="NoSQL Database + GUI, UEBA support">Baza danych NoSQL + GUI, wsparcie UEBA</td></tr>
                 <tr><td>Splunk</td><td>Własny silnik, wymaga dodatków</td></tr>
                 <tr><td>QRadar</td><td>Architektura z AI Watson</td></tr>
                 <tr><td>Sentinel</td><td>Chmurowy, Azure Log Analytics</td></tr>
@@ -479,7 +488,7 @@
                     <th data-pl="Skalowalność" data-en="Scalability">Skalowalność</th>
                     <th data-pl="Ograniczenia Wydajnościowe" data-en="Performance Limitations">Ograniczenia Wydajnościowe</th>
                 </tr>
-                <tr><td>EnergyLogserver</td><td>8 CPU, 16 GB RAM</td><td data-pl="Klaster Elasticsearch" data-en="Elasticsearch Cluster">Klaster Elasticsearch</td><td data-pl="Brak limitu EPS" data-en="No EPS limit">Brak limitu EPS</td></tr>
+                <tr><td>EnergyLogserver</td><td>8 CPU, 16 GB RAM</td><td data-pl="Klaster NoSQL" data-en="NoSQL Cluster">Klaster NoSQL</td><td data-pl="Brak limitu EPS" data-en="No EPS limit">Brak limitu EPS</td></tr>
                 <tr><td>Splunk</td><td>12 CPU, 24vCPU, 12 GB RAM</td><td>Licencja GB/dzień</td><td>Limit GB/dzień</td></tr>
                 <tr><td>QRadar</td><td>16 CPU, 64 GB RAM</td><td>Dedykowane HA</td><td>Wysokie zużycie zasobów</td></tr>
                 <tr><td>Sentinel</td><td>Chmura Azure</td><td>Elastyczna</td><td>Zależna od Azure</td></tr>
