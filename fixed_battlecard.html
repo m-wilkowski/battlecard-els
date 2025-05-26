@@ -1,0 +1,2449 @@
+    <script>
+        let currentActiveTab = 'Marketing'; // Śledź aktywną zakładkę
+
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.className += " active";
+            currentActiveTab = tabName; // Zapisz aktualną zakładkę
+        }
+
+        function filterTable(tableId, checkbox, rowIndex = -1) {
+            var table = document.getElementById(tableId);
+            var rows = table.getElementsByTagName("tr");
+            var allChecked = document.querySelector('input[type="checkbox"]:checked') === null;
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                if (rowIndex === -1 || i === rowIndex) {
+                    if (checkbox.checked || allChecked) {
+                        row.classList.add('filtered');
+                        row.style.display = "";
+                        setTimeout(() => row.classList.remove('filtered'), 300);
+                    } else {
+                        row.classList.add('filtered');
+                        row.style.display = "none";
+                        setTimeout(() => row.classList.remove('filtered'), 300);
+                    }
+                }
+            }
+            updateVendorTable(tableId, document.getElementById('vendor' + tableId.replace('Table', '')).value);
+        }
+
+        function searchTable(tableId, searchTerm) {
+            var table = document.getElementById(tableId);
+            var rows = table.getElementsByTagName("tr");
+            searchTerm = searchTerm.toLowerCase();
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? "" : "none";
+            }
+            updateVendorTable(tableId, document.getElementById('vendor' + tableId.replace('Table', '')).value);
+        }
+
+        function updateVendorTable(tableId, selectedVendor) {
+            var table = document.getElementById(tableId);
+            var headers = table.getElementsByTagName("th");
+            var rows = table.getElementsByTagName("tr");
+
+            if (selectedVendor === "all") {
+                for (var j = 0; j < headers.length; j++) {
+                    headers[j].style.display = "";
+                }
+                for (var i = 1; i < rows.length; i++) {
+                    var cells = rows[i].getElementsByTagName("td");
+                    for (var j = 0; j < cells.length; j++) {
+                        cells[j].style.display = "";
+                    }
+                }
+            } else {
+                var vendorIndex = -1;
+                for (var i = 0; i < headers.length; i++) {
+                    if (headers[i].textContent === selectedVendor) {
+                        vendorIndex = i;
+                        break;
+                    }
+                }
+
+                for (var j = 0; j < headers.length; j++) {
+                    headers[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                }
+
+                for (var i = 1; i < rows.length; i++) {
+                    var cells = rows[i].getElementsByTagName("td");
+                    for (var j = 0; j < cells.length; j++) {
+                        cells[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                    }
+                }
+            }
+        }
+
+        function exportToPDF() {
+            // Sprawdź czy jsPDF jest załadowane
+            if (typeof window.jspdf === 'undefined') {
+                alert('Biblioteka PDF nie jest jeszcze załadowana. Spróbuj ponownie za chwilę.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            
+            try {
+                // Pokaż komunikat o ładowaniu
+                const loadingDiv = document.createElement('div');
+                loadingDiv.innerHTML = '<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #008000; border-radius: 10px; z-index: 9999; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">📄 Generowanie PDF...<br><div style="margin-top: 15px; color: #666; font-size: 14px;">Tworzenie dokumentu</div></div>';
+                document.body.appendChild(loadingDiv);
+
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const margin = 15;
+                const contentWidth = pageWidth - (margin * 2);
+                let yPos = margin;
+
+                // Funkcja do sprawdzania czy trzeba dodać nową stronę
+                function checkNewPage(requiredSpace = 20) {
+                    if (yPos + requiredSpace > pageHeight - margin) {
+                        doc.addPage();
+                        yPos = margin;
+                        return true;
+                    }
+                    return false;
+                }
+
+                // Funkcja do bezpiecznego dodawania tekstu (bez polskich znaków)
+                function addSafeText(text, x, y, options = {}) {
+                    // Zamień polskie znaki na bezpieczne odpowiedniki
+                    const safeText = text
+                        .replace(/ą/g, 'a').replace(/Ą/g, 'A')
+                        .replace(/ć/g, 'c').replace(/Ć/g, 'C')
+                        .replace(/ę/g, 'e').replace(/Ę/g, 'E')
+                        .replace(/ł/g, 'l').replace(/Ł/g, 'L')
+                        .replace(/ń/g, 'n').replace(/Ń/g, 'N')
+                        .replace(/ó/g, 'o').replace(/Ó/g, 'O')
+                        .replace(/ś/g, 's').replace(/Ś/g, 'S')
+                        .replace(/ż/g, 'z').replace(/Ż/g, 'Z')
+                        .replace(/ź/g, 'z').replace(/Ź/g, 'Z');
+                    
+                    doc.text(safeText, x, y, options);
+                }
+
+                // Funkcja do dodawania nagłówka
+                function addHeader(text, size = 14, isGreen = true) {
+                    checkNewPage(size + 10);
+                    doc.setFontSize(size);
+                    doc.setFont('helvetica', 'bold');
+                    
+                    if (isGreen) {
+                        doc.setTextColor(0, 128, 0);
+                    } else {
+                        doc.setTextColor(0, 0, 0);
+                    }
+                    
+                    addSafeText(text, margin, yPos);
+                    yPos += size * 0.5 + 8;
+                }
+
+                // Funkcja do dodawania normalnego tekstu z zawijaniem
+                function addParagraph(text, fontSize = 10) {
+                    doc.setFontSize(fontSize);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    
+                    // Użyj splitTextToSize dla prawidłowego zawijania
+                    const lines = doc.splitTextToSize(text, contentWidth);
+                    
+                    for (let i = 0; i < lines.length; i++) {
+                        checkNewPage(fontSize * 0.6);
+                        addSafeText(lines[i], margin, yPos);
+                        yPos += fontSize * 0.6;
+                    }
+                    yPos += 5; // Dodatkowy odstęp po paragrafie
+                }
+
+                // Ulepszona funkcja do rysowania tabeli
+                function drawTable(tableData, title) {
+                    if (!tableData || tableData.length === 0) return;
+                    
+                    addHeader(title, 12);
+                    
+                    const rowHeight = 7;
+                    const headerHeight = 10;
+                    const colCount = tableData[0].length;
+                    const colWidth = contentWidth / colCount;
+                    
+                    // Rysuj nagłówek tabeli
+                    checkNewPage(headerHeight + 5);
+                    
+                    // Tło nagłówka
+                    doc.setFillColor(0, 128, 0);
+                    doc.rect(margin, yPos - 2, contentWidth, headerHeight, 'F');
+                    
+                    // Tekst nagłówka
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(8);
+                    
+                    tableData[0].forEach((header, colIndex) => {
+                        const x = margin + (colIndex * colWidth) + 2;
+                        const y = yPos + 5;
+                        
+                        // Skróć długie nagłówki
+                        let headerText = header.toString();
+                        if (headerText.length > 12) {
+                            headerText = headerText.substring(0, 10) + '..';
+                        }
+                        
+                        addSafeText(headerText, x, y);
+                    });
+                    
+                    yPos += headerHeight;
+                    
+                    // Rysuj wiersze danych
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(7);
+                    
+                    for (let rowIndex = 1; rowIndex < tableData.length; rowIndex++) {
+                        checkNewPage(rowHeight + 2);
+                        
+                        const row = tableData[rowIndex];
+                        
+                        // Tło dla parzystych wierszy
+                        if (rowIndex % 2 === 0) {
+                            doc.setFillColor(255, 215, 0);
+                            doc.rect(margin, yPos - 1, contentWidth, rowHeight, 'F');
+                        }
+                        
+                        // Ramka wiersza
+                        doc.setDrawColor(200, 200, 200);
+                        doc.setLineWidth(0.1);
+                        doc.rect(margin, yPos - 1, contentWidth, rowHeight);
+                        
+                        // Tekst w komórkach
+                        doc.setTextColor(0, 0, 0);
+                        
+                        row.forEach((cell, colIndex) => {
+                            if (colIndex < colCount) {
+                                const x = margin + (colIndex * colWidth) + 1;
+                                const y = yPos + 4;
+                                
+                                // Skróć długie teksty
+                                let cellText = cell.toString();
+                                if (cellText.length > 15) {
+                                    cellText = cellText.substring(0, 12) + '...';
+                                }
+                                
+                                addSafeText(cellText, x, y);
+                                
+                                // Pionowe linie między kolumnami
+                                if (colIndex > 0) {
+                                    const lineX = margin + (colIndex * colWidth);
+                                    doc.line(lineX, yPos - 1, lineX, yPos + rowHeight - 1);
+                                }
+                            }
+                        });
+                        
+                        yPos += rowHeight;
+                    }
+                    
+                    yPos += 8; // Odstęp po tabeli
+                }
+
+                // Funkcja do pobierania danych z tabeli (ulepszona)
+                function getTableData(tableId) {
+                    const table = document.getElementById(tableId);
+                    if (!table) return null;
+
+                    const data = [];
+                    const rows = table.querySelectorAll('tr');
+                    
+                    rows.forEach((row, index) => {
+                        if (row.style.display === 'none') return;
+                        
+                        const rowData = [];
+                        const cells = row.querySelectorAll(index === 0 ? 'th' : 'td');
+                        
+                        cells.forEach(cell => {
+                            if (cell.style.display !== 'none') {
+                                rowData.push(cell.textContent.trim());
+                            }
+                        });
+                        
+                        if (rowData.length > 0) {
+                            data.push(rowData);
+                        }
+                    });
+                    
+                    return data.length > 0 ? data : null;
+                }
+
+                // === TWORZENIE PDF ===
+
+                // Strona tytułowa z lepszym layoutem
+                doc.setFillColor(0, 128, 0);
+                doc.rect(0, 0, pageWidth, 60, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(24);
+                addSafeText('EnergyLogserver', pageWidth/2, 25, { align: 'center' });
+                
+                doc.setFontSize(16);
+                addSafeText('SIEM Battlecard', pageWidth/2, 40, { align: 'center' });
+                
+                doc.setFontSize(12);
+                addSafeText('Data: Luty 2025', pageWidth/2, 52, { align: 'center' });
+
+                yPos = 80;
+                
+                // Hasło firmowe
+                doc.setTextColor(0, 128, 0);
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(11);
+                const motto = '"Bezpieczenstwo na wyciagniecie reki - elastyczne, skalowalne, wspierane lokalnie."';
+                addSafeText(motto, pageWidth/2, yPos, { align: 'center' });
+                
+                yPos += 30;
+
+                // === SEKCJA MARKETINGOWA ===
+                addHeader('BATTLECARD MARKETINGOWY', 16);
+                
+                addHeader('1. Opis Rozwiazania', 12);
+                addParagraph('EnergyLogserver to nowoczesny SIEM laczacy analize zagrozen w czasie rzeczywistym, intuicyjne dashboardy i pelne wsparcie techniczne w jezyku polskim. Idealny dla firm kazdej wielkosci, oferujacy niskie TCO, szybkie wdrozenie oraz zaawansowana automatyzacje dzieki natywnej integracji z SOAR, XDR i UEBA.');
+
+                addHeader('2. Pozycjonowanie Rynkowe', 12);
+                addParagraph('Dla kogo: Male i srednie przedsiebiorstwa (MSP), sektor finansowy, przemyslowy, administracja publiczna.');
+                addParagraph('Klienci: Lokalne banki, firmy produkcyjne, dostawcy uslug IT.');
+                addParagraph('Konkurencja: EnergyLogserver rosnie w Polsce dzieki lokalnemu wsparciu, nizszym kosztom i elastycznosci.');
+
+                // Dodaj tabele z danymi
+                const tables = [
+                    { id: 'marketingTable', title: '3. Kluczowe Przewagi' },
+                    { id: 'benefitsTable', title: '4. Kluczowe Korzysci Biznesowe' },
+                    { id: 'reviewsTable', title: '5. Opinie Uzytkownikow' },
+                    { id: 'featuresTable', title: '6. Unikalne Funkcjonalnosci' }
+                ];
+
+                tables.forEach(table => {
+                    const tableData = getTableData(table.id);
+                    if (tableData) {
+                        drawTable(tableData, table.title);
+                    }
+                });
+
+                // Case Studies
+                addHeader('7. Case Study', 12);
+                
+                addHeader('Polska Firma Finansowa', 10, false);
+                addParagraph('W duzej polskiej firmie finansowej wdrozenie EnergyLogserver pozwolilo na redukcje czasu detekcji zagrozen o 50% dzieki natywnej integracji z SOAR. Automatyzacja procesow reagowania na incydenty skrocila czas reakcji z godzin do minut.');
+                addParagraph('Korzysc: Lepsza ochrona danych klientow i zgodnosc z regulacjami GDPR.');
+
+                addHeader('Producent Przemyslowy', 10, false);
+                addParagraph('Miedzynarodowy producent przemyslowy wykorzystal EnergyLogserver do wykrycia anomalii w swojej infrastrukturze dzieki XDR. System zidentyfikowal potencjalny atak ransomware w czasie rzeczywistym.');
+                addParagraph('Korzysc: Ochrona ciaglosci produkcji i oszczednosc kosztow zwiazanych z przestojami.');
+
+                // === SEKCJA TECHNICZNA ===
+                doc.addPage();
+                yPos = margin;
+                
+                addHeader('BATTLECARD TECHNICZNY', 16);
+
+                // Tabele techniczne
+                const technicalTables = [
+                    { id: 'architectureTable', title: '1. Architektura Systemu' },
+                    { id: 'technicalTable', title: '2. Kluczowe Przewagi Techniczne' },
+                    { id: 'requirementsTable', title: '3. Wymagania i Skalowalnosc' },
+                    { id: 'integrationsTable', title: '4. Integracje z Ekosystemem' },
+                    { id: 'threatTable', title: '5. Threat Intelligence' },
+                    { id: 'apiTable', title: '6. API i Rozszerzalnosc' },
+                    { id: 'benchmarkTable', title: '7. Benchmark Wydajnosciowy' }
+                ];
+
+                technicalTables.forEach(table => {
+                    const tableData = getTableData(table.id);
+                    if (tableData) {
+                        drawTable(tableData, table.title);
+                    }
+                });
+
+                // Kontakt
+                checkNewPage(40);
+                addHeader('Kontakt', 12);
+                addParagraph('EnergyLogserver Sp. z o.o.');
+                addParagraph('E-mail: kontakt@energylogserver.com');
+                addParagraph('Telefon: +48 XXX XXX XXX');
+                addParagraph('Strona: www.energylogserver.com');
+
+                // Dodaj stopki na wszystkich stronach
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(128, 128, 128);
+                    doc.setFont('helvetica', 'normal');
+                    addSafeText(`Strona ${i} z ${totalPages}`, pageWidth - margin, pageHeight - 8, { align: 'right' });
+                    addSafeText('EnergyLogserver SIEM (c) 2025', margin, pageHeight - 8);
+                }
+
+                // Usuń komunikat ładowania
+                setTimeout(() => {
+                    if (loadingDiv.parentNode) {
+                        document.body.removeChild(loadingDiv);
+                    }
+                }, 300);
+
+                // Zapisz PDF z lepszą nazwą
+                const today = new Date();
+                const dateStr = today.getFullYear() + '-' + 
+                              String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(today.getDate()).padStart(2, '0');
+                doc.save(`EnergyLogserver_Battlecard_${dateStr}.pdf`);
+                
+                console.log('PDF wygenerowany pomyślnie');
+
+            } catch (error) {
+                console.error('Błąd generowania PDF:', error);
+                alert('Wystąpił błąd podczas generowania PDF: ' + error.message);
+                
+                // Usuń komunikat ładowania w przypadku błędu
+                const loadingDiv = document.querySelector('div[style*="position: fixed"]');
+                if (loadingDiv && loadingDiv.parentNode) {
+                    loadingDiv.parentNode.removeChild(loadingDiv);
+                }
+            }
+        }
+
+        // ROI Calculator Functions
+        function calculateROI() {
+            const form = document.getElementById('roiForm');
+            const formData = new FormData(form);
+            
+            const currentSolution = formData.get('currentSolution');
+            const companySize = formData.get('companySize');
+            const eventsPerDay = parseInt(formData.get('eventsPerDay')) || 0;
+            const currentCost = parseInt(formData.get('currentCost')) || 0;
+            const itStaff = parseInt(formData.get('itStaff')) || 1;
+            const industry = formData.get('industry');
+
+            // Validate required fields
+            if (!currentSolution || !companySize || !eventsPerDay) {
+                alert('Proszę wypełnić wszystkie wymagane pola.');
+                return;
+            }
+
+            // Cost calculation logic
+            const costs = calculateCosts(currentSolution, companySize, eventsPerDay, currentCost, itStaff, industry);
+            
+            // Display results
+            displayROIResults(costs);
+            
+            // Show results section
+            document.getElementById('roiResults').style.display = 'block';
+            document.getElementById('roiResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function calculateCosts(currentSolution, companySize, eventsPerDay, currentCost, itStaff, industry) {
+            // EnergyLogserver pricing model
+            const elsPricing = {
+                small: { license: 120000, implementation: 30000, support: 24000 },
+                medium: { license: 250000, implementation: 60000, support: 50000 },
+                large: { license: 450000, implementation: 120000, support: 90000 }
+            };
+
+            // Competitor pricing estimates (annual)
+            const competitorPricing = {
+                splunk: {
+                    small: { license: 300000, implementation: 80000, support: 60000 },
+                    medium: { license: 650000, implementation: 150000, support: 130000 },
+                    large: { license: 1200000, implementation: 300000, support: 240000 }
+                },
+                qradar: {
+                    small: { license: 200000, implementation: 70000, support: 40000 },
+                    medium: { license: 450000, implementation: 120000, support: 90000 },
+                    large: { license: 800000, implementation: 200000, support: 160000 }
+                },
+                sentinel: {
+                    small: { license: 180000, implementation: 40000, support: 35000 },
+                    medium: { license: 380000, implementation: 80000, support: 75000 },
+                    large: { license: 700000, implementation: 150000, support: 140000 }
+                },
+                fortisiem: {
+                    small: { license: 160000, implementation: 50000, support: 32000 },
+                    medium: { license: 320000, implementation: 90000, support: 64000 },
+                    large: { license: 600000, implementation: 160000, support: 120000 }
+                },
+                securevision: {
+                    small: { license: 140000, implementation: 35000, support: 28000 },
+                    medium: { license: 280000, implementation: 70000, support: 56000 },
+                    large: { license: 520000, implementation: 130000, support: 104000 }
+                },
+                custom: {
+                    small: { license: currentCost || 150000, implementation: 60000, support: 30000 },
+                    medium: { license: currentCost || 350000, implementation: 100000, support: 70000 },
+                    large: { license: currentCost || 650000, implementation: 180000, support: 130000 }
+                },
+                none: {
+                    small: { license: 0, implementation: 100000, support: 0 },
+                    medium: { license: 0, implementation: 200000, support: 0 },
+                    large: { license: 0, implementation: 400000, support: 0 }
+                }
+            };
+
+            // Get costs for current solution
+            const currentCosts = competitorPricing[currentSolution]?.[companySize] || 
+                               competitorPricing.custom[companySize];
+            const elsCosts = elsPricing[companySize];
+
+            // Operational costs (staff time, training, etc.)
+            const staffCostPerYear = itStaff * 120000; // Average IT security salary
+            const currentOpCost = staffCostPerYear * 0.3; // 30% time on SIEM management
+            const elsOpCost = staffCostPerYear * 0.15; // ELS reduces management overhead
+
+            // Industry-specific adjustments
+            const industryMultipliers = {
+                finance: 1.2,
+                healthcare: 1.15,
+                government: 1.1,
+                manufacturing: 1.0,
+                retail: 0.95,
+                it: 0.9,
+                other: 1.0
+            };
+            
+            const multiplier = industryMultipliers[industry] || 1.0;
+
+            // Calculate 3-year TCO
+            const currentTotal3Year = {
+                license: (currentCosts.license * 3) * multiplier,
+                implementation: currentCosts.implementation * multiplier,
+                support: (currentCosts.support * 3) * multiplier,
+                operational: (currentOpCost * 3) * multiplier
+            };
+
+            const elsTotal3Year = {
+                license: (elsCosts.license * 3) * multiplier,
+                implementation: elsCosts.implementation * multiplier,
+                support: (elsCosts.support * 3) * multiplier,
+                operational: (elsOpCost * 3) * multiplier
+            };
+
+            // Calculate savings
+            const totalCurrentCost = Object.values(currentTotal3Year).reduce((a, b) => a + b, 0);
+            const totalElsCost = Object.values(elsTotal3Year).reduce((a, b) => a + b, 0);
+            const totalSavings = totalCurrentCost - totalElsCost;
+            const annualSavings = totalSavings / 3;
+            const roi = totalElsCost > 0 ? ((totalSavings / totalElsCost) * 100) : 0;
+            const paybackPeriod = annualSavings > 0 ? (totalElsCost / 3) / (annualSavings / 12) : 0;
+
+            return {
+                current: currentTotal3Year,
+                els: elsTotal3Year,
+                savings: {
+                    total: totalSavings,
+                    annual: annualSavings,
+                    roi: roi,
+                    paybackPeriod: paybackPeriod
+                },
+                totals: {
+                    current: totalCurrentCost,
+                    els: totalElsCost
+                }
+            };
+        }
+
+        function displayROIResults(costs) {
+            // Format currency
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('pl-PL', {
+                    style: 'currency',
+                    currency: 'PLN',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(amount);
+            };
+
+            // Update summary metrics
+            document.getElementById('totalSavings').textContent = formatCurrency(costs.savings.annual);
+            document.getElementById('roiPercentage').textContent = Math.round(costs.savings.roi) + '%';
+            document.getElementById('paybackPeriod').textContent = Math.round(costs.savings.paybackPeriod) + ' miesięcy';
+
+            // Update breakdown table
+            document.getElementById('currentLicenseCost').textContent = formatCurrency(costs.current.license / 3);
+            document.getElementById('elsLicenseCost').textContent = formatCurrency(costs.els.license / 3);
+            document.getElementById('licenseSavings').textContent = formatCurrency((costs.current.license - costs.els.license) / 3);
+
+            document.getElementById('currentImplementationCost').textContent = formatCurrency(costs.current.implementation);
+            document.getElementById('elsImplementationCost').textContent = formatCurrency(costs.els.implementation);
+            document.getElementById('implementationSavings').textContent = formatCurrency(costs.current.implementation - costs.els.implementation);
+
+            document.getElementById('currentSupportCost').textContent = formatCurrency(costs.current.support / 3);
+            document.getElementById('elsSupportCost').textContent = formatCurrency(costs.els.support / 3);
+            document.getElementById('supportSavings').textContent = formatCurrency((costs.current.support - costs.els.support) / 3);
+
+            document.getElementById('currentOperationalCost').textContent = formatCurrency(costs.current.operational / 3);
+            document.getElementById('elsOperationalCost').textContent = formatCurrency(costs.els.operational / 3);
+            document.getElementById('operationalSavings').textContent = formatCurrency((costs.current.operational - costs.els.operational) / 3);
+
+            document.getElementById('currentTotalCost').textContent = formatCurrency(costs.totals.current);
+            document.getElementById('elsTotalCost').textContent = formatCurrency(costs.totals.els);
+            document.getElementById('totalCostSavings').textContent = formatCurrency(costs.savings.total);
+
+            // Add CSS class for positive savings
+            const savingsElements = ['licenseSavings', 'implementationSavings', 'supportSavings', 'operationalSavings', 'totalCostSavings'];
+            savingsElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element && !element.textContent.includes('-')) {
+                    element.classList.add('savings-positive');
+                }
+            });
+
+            // Update benefits based on calculation
+            const benefits = [
+                '✅ Dedykowane wsparcie w języku polskim (24/7)',
+                '✅ Szybsze wdrożenie (1-2 dni vs 5-10 dni)',
+            // Update benefits based on calculation
+            const benefits = [
+                '✅ Dedykowane wsparcie w języku polskim (24/7)',
+                '✅ Szybsze wdrożenie (1-2 dni vs 5-10 dni)',
+                '✅ Niższe koszty operacyjne dzięki intuicyjnemu interfejsowi',
+                '✅ Brak ukrytych kosztów - wszystko w standardzie',
+                '✅ Lokalne wsparcie techniczne'
+            ];
+
+            if (costs.savings.roi > 50) {
+                benefits.push('🚀 Wysoki ROI - inwestycja zwraca się szybko');
+            }
+
+            if (costs.savings.paybackPeriod < 12) {
+                benefits.push('⚡ Szybki okres zwrotu - mniej niż rok');
+            }
+
+            const benefitsList = document.getElementById('additionalBenefits');
+            benefitsList.innerHTML = benefits.map(benefit => `<li>${benefit}</li>`).join('');
+
+            // Add animation to metrics
+            setTimeout(() => {
+                document.querySelectorAll('.roi-value').forEach(el => {
+                    el.classList.add('animate');
+                });
+            }, 100);
+        }
+
+        function exportROIReport() {
+            // This will extend the existing PDF export to include ROI data
+            alert('Funkcja eksportu raportu ROI zostanie dodana do głównego eksportu PDF!');
+        }
+
+        function emailROIReport() {
+            const results = document.getElementById('roiResults');
+            if (results.style.display === 'none') {
+                alert('Najpierw oblicz ROI, aby wysłać raport.');
+                return;
+            }
+
+            const savings = document.getElementById('totalSavings').textContent;
+            const roi = document.getElementById('roiPercentage').textContent;
+            
+            const emailBody = `Cześć!
+
+Sprawdziłem kalkulator ROI dla EnergyLogserver i wyniki są bardzo interesujące:
+
+🔹 Roczne oszczędności: ${savings}
+🔹 ROI: ${roi}
+🔹 Pełne porównanie dostępne na: ${window.location.href}
+
+Czy możemy umówić się na prezentację rozwiązania?
+
+Pozdrawiam!`;
+
+            const mailtoLink = `mailto:?subject=Kalkulator ROI - EnergyLogserver SIEM&body=${encodeURIComponent(emailBody)}`;
+            window.open(mailtoLink);
+        }
+
+        // Obsługa formularzy kontaktowych
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("contactForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                alert("Wiadomość wysłana! Skontaktujemy się z Tobą wkrótce.\n\nKontakt: kontakt@energylogserver.com");
+            });
+            
+            document.getElementById("contactFormTech").addEventListener("submit", function(e) {
+                e.preventDefault();
+                alert("Wiadomość wysłana! Skontaktujemy się z Tobą wkrótce.\n\nKontakt: kontakt@energylogserver.com");
+            });
+
+            // Inicjalizacja
+            document.getElementById("defaultOpen").click();
+            
+            // Inicjalne ustawienie tabel
+            const tables = ['marketingTable', 'benefitsTable', 'reviewsTable', 'featuresTable', 
+                          'architectureTable', 'technicalTable', 'requirementsTable', 'integrationsTable', 
+                          'threatTable', 'apiTable', 'benchmarkTable'];
+            
+            tables.forEach(tableId => {
+                updateVendorTable(tableId, 'all');
+            });
+        });
+
+        // Sprawdź załadowanie bibliotek
+        function checkLibraries() {
+            if (typeof window.jspdf === 'undefined') {
+                console.log('jsPDF nie jest jeszcze załadowane');
+                setTimeout(checkLibraries, 1000);
+            } else {
+                console.log('Biblioteka PDF jest załadowana');
+            }
+        }
+        checkLibraries();
+    </script><!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnergyLogserver – Battlecard SIEM</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f1f1f1; /* Szary tło */
+            color: #333;
+        }
+        h1, h2 {
+            color: #008000; /* Zielony EnergyLogserver */
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in;
+        }
+        .logo {
+            max-width: 150px; /* Dostosuj rozmiar logo */
+            transition: transform 0.3s ease;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+            color: #008000; /* Zielony tekst */
+        }
+        .tab button:hover {
+            background-color: #FFD700; /* Żółty hover */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .tab button.active {
+            background-color: #008000; /* Zielony aktywny */
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 128, 0, 0.3);
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            background-color: white;
+            animation: slideDown 0.5s ease-in;
+        }
+        .tabcontent.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+            transition: opacity 0.3s ease;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #008000; /* Zielony nagłówek */
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #FFD700; /* Żółty tło dla parzystych wierszy */
+        }
+        .cta-button {
+            background-color: #008000; /* Zielony przycisk */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 128, 0, 0.3);
+        }
+        .filter, .search, .vendor-select {
+            margin-bottom: 20px;
+        }
+        .vendor-select select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        details {
+            margin: 10px 0;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #008000; /* Zielony tekst */
+        }
+        /* Stylizacja formularza kontaktowego */
+        .contact-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .contact-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .contact-form textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .contact-form button {
+            width: 100%;
+            background-color: #008000;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .contact-form button:hover {
+            background-color: #006400;
+        }
+        /* Stylizacja sekcji Case Study */
+        .case-study-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .case-study {
+            background-color: #f9f9f9;
+            border-left: 5px solid #008000;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 1 1 300px;
+            transition: transform 0.3s ease;
+            animation: fadeIn 0.5s ease-in;
+        }
+        .case-study:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 128, 0, 0.2);
+        }
+        .case-study h3 {
+            color: #008000;
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        .case-study p {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        .case-study .highlight {
+            font-weight: bold;
+            color: #FFD700;
+            background-color: #008000;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        /* Animacje */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeToggle {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        tr.filtered {
+            animation: fadeToggle 0.3s ease-in-out;
+        }
+
+        /* Style dla PDF */
+        .pdf-page {
+            page-break-before: always;
+            margin: 0;
+            padding: 20px;
+            background: white;
+        }
+        
+        .pdf-page:first-child {
+            page-break-before: auto;
+        }
+
+        /* Responsywność */
+        @media screen and (max-width: 768px) {
+            .container { margin: 10px; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .logo { max-width: 100px; margin-bottom: 10px; }
+            table { display: block; overflow-x: auto; }
+            .tab button { padding: 10px 12px; font-size: 14px; }
+            .tabcontent { padding: 15px; }
+            .contact-form { padding: 15px; }
+            .case-study { flex: 1 1 100%; }
+        }
+        @media screen and (max-width: 480px) {
+            .header { padding: 5px; }
+            .logo { max-width: 80px; }
+            .tab button { padding: 8px 10px; font-size: 12px; }
+            .cta-button { padding: 8px 15px; font-size: 14px; }
+            .contact-form { padding: 10px; }
+        }
+
+        /* Stylizacja kalkulatora ROI */
+        .roi-calculator {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 128, 0, 0.1);
+            margin: 20px 0;
+            border-left: 5px solid #008000;
+        }
+
+        .roi-calculator h3 {
+            color: #008000;
+            margin-top: 0;
+            font-size: 1.3em;
+            text-align: center;
+        }
+
+        .roi-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .roi-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .roi-input-group label {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .roi-input-group select,
+        .roi-input-group input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .roi-input-group select:focus,
+        .roi-input-group input:focus {
+            outline: none;
+            border-color: #008000;
+            box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.1);
+        }
+
+        .roi-results {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(0, 128, 0, 0.15);
+            border: 2px solid #008000;
+            animation: slideDown 0.5s ease-in;
+        }
+
+        .roi-results h3 {
+            color: #008000;
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.4em;
+        }
+
+        .roi-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .roi-metric {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #008000, #006400);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 128, 0, 0.3);
+        }
+
+        .roi-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .roi-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .roi-breakdown {
+            margin: 25px 0;
+        }
+
+        .roi-breakdown h4 {
+            color: #008000;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .roi-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        .roi-table th {
+            background-color: #008000;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .roi-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .roi-table tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+
+        .roi-table .total-row {
+            background-color: #FFD700 !important;
+            font-weight: bold;
+        }
+
+        .roi-table .savings-positive {
+            color: #008000;
+            font-weight: bold;
+        }
+
+        .roi-benefits {
+            background-color: #f0f8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .roi-benefits h4 {
+            color: #008000;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .roi-benefits ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .roi-benefits li {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .roi-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .roi-highlight {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Animacje dla ROI */
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .roi-value.animate {
+            animation: countUp 0.8s ease-out;
+        }
+
+        /* Responsywność kalkulatora */
+        @media screen and (max-width: 768px) {
+            .roi-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .roi-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .roi-actions {
+                flex-direction: column;
+            }
+            
+            .roi-table {
+                font-size: 0.85em;
+            }
+            
+            .roi-table th,
+            .roi-table td {
+                padding: 8px 4px;
+            }
+        /* Ukryj elementy podczas generowania PDF */
+        .pdf-hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>EnergyLogserver – Battlecard SIEM</h1>
+                <p><strong>Hasło:</strong> "Bezpieczeństwo na wyciągnięcie ręki – elastyczne, skalowalne, wspierane lokalnie."</p>
+                <p><strong>Data:</strong> Luty 2025</p>
+            </div>
+            <img src="ELS_dark.png" alt="EnergyLogserver Logo" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display:none;">Logo EnergyLogserver</div> <!-- Fallback, jeśli logo nie wczyta się -->
+        </div>
+        </div>
+
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Marketing')" id="defaultOpen">Marketingowy</button>
+            <button class="tablinks" onclick="openTab(event, 'Techniczny')">Techniczny</button>
+        </div>
+
+        <!-- Battlecard Marketingowy -->
+        <div id="Marketing" class="tabcontent">
+            <h2>1. Opis Rozwiązania</h2>
+            <p>EnergyLogserver to nowoczesny SIEM łączący analizę zagrożeń w czasie rzeczywistym, intuicyjne dashboardy i pełne wsparcie techniczne w języku polskim. Idealny dla firm każdej wielkości, oferujący niskie TCO, szybkie wdrożenie oraz zaawansowaną automatyzację dzięki natywnej integracji z SOAR, XDR i UEBA.</p>
+
+            <h2>2. Pozycjonowanie Rynkowe</h2>
+            <p>Dla kogo: Małe i średnie przedsiębiorstwa (MSP), sektor finansowy, przemysłowy, administracja publiczna.<br>
+            Klienci: Lokalne banki, firmy produkcyjne, dostawcy usług IT.<br>
+            Konkurencja: EnergyLogserver rośnie w Polsce dzięki lokalnemu wsparciu, niższym kosztom i elastyczności.</p>
+
+            <h2>3. Kluczowe Przewagi</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorMarketing">Porównaj z: </label>
+                <select id="vendorMarketing" onchange="updateVendorTable('marketingTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <div class="filter pdf-interactive">
+                <label><input type="checkbox" checked onchange="filterTable('marketingTable', this)"> Pokaż wszystko</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 1)"> Licencjonowanie</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 2)"> Wsparcie</label>
+                <label><input type="checkbox" onchange="filterTable('marketingTable', this, 6)"> SOAR</label>
+            </div>
+            <div class="search pdf-interactive">
+                <input type="text" id="marketingSearch" placeholder="Wyszukaj..." onkeyup="searchTable('marketingTable', this.value)">
+            </div>
+            <table id="marketingTable">
+                <tr><th>Cecha</th><th>EnergyLogserver</th><th>Splunk</th><th>QRadar</th><th>Sentinel</th><th>FortiSIEM</th><th>SecureVisio</th></tr>
+                <tr><td>Licencjonowanie</td><td>Sub/Wieczysta</td><td>Sub (GB/dzień)</td><td>Sub</td><td>Chmurowa</td><td>Sub</td><td>Sub</td></tr>
+                <tr><td>Wsparcie</td><td>Dedykowane, PL</td><td>Płatne, ENG</td><td>Płatne, PL</td><td>Microsoft ENG</td><td>Płatne, ENG</td><td>Dedykowane, PL</td></tr>
+                <tr><td>Koszt TCO</td><td>Niski</td><td>Bardzo wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Średni</td></tr>
+                <tr><td>Czas Wdrożenia</td><td>Godziny</td><td>Dni</td><td>Dni</td><td>Godziny</td><td>Dni</td><td>Godziny</td></tr>
+                <tr><td>Lokalne TI Feeds</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
+                <tr><td>Natywna Integracja SOAR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>UEBA</td><td>Tak</td><td>Płatne</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>XDR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Nie</td></tr>
+                <tr><td>Otwarty Interfejs</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
+                <tr><td>Certyfikaty</td><td>GDPR, SOC2</td><td>PCI DSS, HIPAA</td><td>FedRAMP</td><td>SOC2</td><td>NSS Labs</td><td>KNF, RODO</td></tr>
+                <tr><td>Czas Reakcji Wsparcia</td><td><1h</td><td>4h (Premium)</td><td>2h</td><td>Via Azure</td><td>4h</td><td><1h</td></tr>
+                <tr><td>Koszty Początkowe</td><td>Niski</td><td>Wysoki</td><td>Wysoki</td><td>Średni</td><td>Średni</td><td>Niski</td></tr>
+            </table>
+
+            <h2>4. Kluczowe Korzyści Biznesowe</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorBenefits">Porównaj z: </label>
+                <select id="vendorBenefits" onchange="updateVendorTable('benefitsTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="benefitsTable">
+                <tr><th>Korzyść</th><th>EnergyLogserver</th><th>Splunk</th><th>QRadar</th><th>Sentinel</th><th>FortiSIEM</th><th>SecureVisio</th></tr>
+                <tr><td>Funkcjonalności</td><td>Gotowe reguły, dashboardy, Empowered AI</td><td>Analityka, płatne dodatki</td><td>AI Watson, reguły</td><td>Dashboardy, Azure</td><td>Sieciowe, reguły</td><td>Reguły, dashboardy</td></tr>
+                <tr><td>Wsparcie w PL</td><td>Dedykowane, 24/7, <1h</td><td>Brak</td><td>Płatne, 2h</td><td>Brak</td><td>Brak</td><td>Dedykowane, 24/7, <1h</td></tr>
+                <tr><td>Koszty</td><td>Niski TCO, niskie początkowe</td><td>Wysokie TCO, wysokie początkowe</td><td>Wysokie TCO, wysokie początkowe</td><td>Średnie TCO, średnie początkowe</td><td>Średnie TCO, średnie początkowe</td><td>Średnie TCO, niskie początkowe</td></tr>
+                <tr><td>Skalowalność</td><td>Elastyczna, bez limitów EPS</td><td>Ograniczenia GB/dzień</td><td>Wysokie zasoby</td><td>Elastyczna w Azure</td><td>Multi-tenant, ~50k EPS</td><td>Klaster, ~30k EPS</td></tr>
+                <tr><td>Automatyzacja</td><td>SOAR, XDR, UEBA</td><td>Płatne SOAR, brak XDR</td><td>SOAR, XDR, UEBA</td><td>SOAR, XDR via Defender</td><td>SOAR, XDR, UEBA</td><td>SOAR, UEBA</td></tr>
+                <tr><td>Elastyczność</td><td>Otwarty interfejs</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Otwarty interfejs</td></tr>
+            </table>
+
+            <h2>5. Opinie Użytkowników</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorReviews">Porównaj z: </label>
+                <select id="vendorReviews" onchange="updateVendorTable('reviewsTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="reviewsTable">
+                <tr><th>Rozwiązanie</th><th>Chwalone</th><th>Krytyka</th></tr>
+                <tr><td>EnergyLogserver</td><td>Szybkie wdrożenie, support PL</td><td>Mniejsza rozpoznawalność</td></tr>
+                <tr><td>Splunk</td><td>Analityka</td><td>Koszty, złożoność</td></tr>
+                <tr><td>QRadar</td><td>AI</td><td>Zasoby, administracja</td></tr>
+                <tr><td>Sentinel</td><td>Azure</td><td>Raporty</td></tr>
+                <tr><td>FortiSIEM</td><td>Sieć</td><td>Wydajność</td></tr>
+                <tr><td>SecureVisio</td><td>Support PL</td><td>Skalowalność</td></tr>
+            </table>
+
+            <h2>6. Unikalne Funkcjonalności EnergyLogserver</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorFeatures">Porównaj z: </label>
+                <select id="vendorFeatures" onchange="updateVendorTable('featuresTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="featuresTable">
+                <tr><th>Funkcjonalność</th><th>EnergyLogserver</th><th>Splunk</th><th>QRadar</th><th>Sentinel</th><th>FortiSIEM</th><th>SecureVisio</th></tr>
+                <tr><td>Empowered AI</td><td>Predykcja zagrożeń</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
+                <tr><td>Network Probe</td><td>Analiza Netflow (50k Flow/s)</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
+                <tr><td>e-Doc</td><td>Dokumentacja IT</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td></tr>
+                <tr><td>Otwarty Interfejs</td><td>Elastyczność</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Brak</td><td>Elastyczność</td></tr>
+            </table>
+
+            <h2>7. Case Study</h2>
+            <div class="case-study-container">
+                <div class="case-study">
+                    <h3>Polska Firma Finansowa</h3>
+                    <p>W dużej polskiej firmie finansowej wdrożenie EnergyLogserver pozwoliło na <span class="highlight">redukcję czasu detekcji zagrożeń o 50%</span> dzięki natywnej integracji z SOAR. Automatyzacja procesów reagowania na incydenty skróciła czas reakcji z godzin do minut, co znacząco zwiększyło bezpieczeństwo operacyjne.</p>
+                    <p><strong>Korzyść:</strong> Lepsza ochrona danych klientów i zgodność z regulacjami GDPR.</p>
+                </div>
+                <div class="case-study">
+                    <h3>Producent Przemysłowy</h3>
+                    <p>Międzynarodowy producent przemysłowy wykorzystał EnergyLogserver do wykrycia anomalii w swojej infrastrukturze dzięki XDR. System zidentyfikował <span class="highlight">potencjalny atak ransomware</span> w czasie rzeczywistym, co pozwoliło na szybką reakcję i zminimalizowanie wpływu na produkcję.</p>
+                    <p><strong>Korzyść:</strong> Ochrona ciągłości produkcji i oszczędność kosztów związanych z przestojami.</p>
+                </div>
+            </div>
+
+            <h2>8. Kalkulator ROI/TCO</h2>
+            <div class="roi-calculator">
+                <h3>Oblicz swoje oszczędności z EnergyLogserver</h3>
+                <form id="roiForm">
+                    <div class="roi-inputs">
+                        <div class="roi-input-group">
+                            <label for="currentSolution">Obecne rozwiązanie:</label>
+                            <select id="currentSolution" name="currentSolution">
+                                <option value="">Wybierz...</option>
+                                <option value="splunk">Splunk</option>
+                                <option value="qradar">IBM QRadar</option>
+                                <option value="sentinel">Microsoft Sentinel</option>
+                                <option value="fortisiem">FortiSIEM</option>
+                                <option value="securevision">SecureVision</option>
+                                <option value="custom">Inne/Własne</option>
+                                <option value="none">Brak SIEM</option>
+                            </select>
+                        </div>
+                        
+                        <div class="roi-input-group">
+                            <label for="companySize">Wielkość firmy:</label>
+                            <select id="companySize" name="companySize">
+                                <option value="">Wybierz...</option>
+                                <option value="small">Mała (50-200 pracowników)</option>
+                                <option value="medium">Średnia (200-1000 pracowników)</option>
+                                <option value="large">Duża (1000+ pracowników)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="roi-input-group">
+                            <label for="eventsPerDay">Zdarzenia na dzień (EPS):</label>
+                            <select id="eventsPerDay" name="eventsPerDay">
+                                <option value="">Wybierz...</option>
+                                <option value="1000">Do 1K EPS</option>
+                                <option value="5000">1K - 5K EPS</option>
+                                <option value="15000">5K - 15K EPS</option>
+                                <option value="50000">15K - 50K EPS</option>
+                                <option value="100000">50K+ EPS</option>
+                            </select>
+                        </div>
+                        
+                        <div class="roi-input-group">
+                            <label for="currentCost">Obecne roczne koszty SIEM (PLN):</label>
+                            <input type="number" id="currentCost" name="currentCost" placeholder="np. 500000" min="0">
+                        </div>
+                        
+                        <div class="roi-input-group">
+                            <label for="itStaff">Liczba osób w zespole IT Security:</label>
+                            <input type="number" id="itStaff" name="itStaff" placeholder="np. 3" min="1" max="50">
+                        </div>
+                        
+                        <div class="roi-input-group">
+                            <label for="industry">Branża:</label>
+                            <select id="industry" name="industry">
+                                <option value="">Wybierz...</option>
+                                <option value="finance">Finanse/Bankowość</option>
+                                <option value="manufacturing">Produkcja/Przemysł</option>
+                                <option value="healthcare">Ochrona zdrowia</option>
+                                <option value="retail">Handel/E-commerce</option>
+                                <option value="government">Administracja publiczna</option>
+                                <option value="it">IT/Technologie</option>
+                                <option value="other">Inne</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="cta-button" onclick="calculateROI()">
+                        🧮 Oblicz ROI i oszczędności
+                    </button>
+                </form>
+                
+                <div id="roiResults" class="roi-results" style="display: none;">
+                    <h3>Twoje potencjalne oszczędności:</h3>
+                    <div class="roi-summary">
+                        <div class="roi-metric">
+                            <div class="roi-value" id="totalSavings">0 PLN</div>
+                            <div class="roi-label">Oszczędności roczne</div>
+                        </div>
+                        <div class="roi-metric">
+                            <div class="roi-value" id="roiPercentage">0%</div>
+                            <div class="roi-label">ROI</div>
+                        </div>
+                        <div class="roi-metric">
+                            <div class="roi-value" id="paybackPeriod">0 miesięcy</div>
+                            <div class="roi-label">Okres zwrotu</div>
+                        </div>
+                    </div>
+                    
+                    <div class="roi-breakdown">
+                        <h4>Szczegółowe porównanie kosztów:</h4>
+                        <table class="roi-table">
+                            <tr>
+                                <th>Składnik kosztu</th>
+                                <th>Obecne rozwiązanie</th>
+                                <th>EnergyLogserver</th>
+                                <th>Oszczędność</th>
+                            </tr>
+                            <tr>
+                                <td>Licencje (rocznie)</td>
+                                <td id="currentLicenseCost">-</td>
+                                <td id="elsLicenseCost">-</td>
+                                <td id="licenseSavings">-</td>
+                            </tr>
+                            <tr>
+                                <td>Wdrożenie</td>
+                                <td id="currentImplementationCost">-</td>
+                                <td id="elsImplementationCost">-</td>
+                                <td id="implementationSavings">-</td>
+                            </tr>
+                            <tr>
+                                <td>Wsparcie techniczne</td>
+                                <td id="currentSupportCost">-</td>
+                                <td id="elsSupportCost">-</td>
+                                <td id="supportSavings">-</td>
+                            </tr>
+                            <tr>
+                                <td>Koszty operacyjne</td>
+                                <td id="currentOperationalCost">-</td>
+                                <td id="elsOperationalCost">-</td>
+                                <td id="operationalSavings">-</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>RAZEM (3 lata)</strong></td>
+                                <td id="currentTotalCost"><strong>-</strong></td>
+                                <td id="elsTotalCost"><strong>-</strong></td>
+                                <td id="totalCostSavings"><strong>-</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="roi-benefits">
+                        <h4>Dodatkowe korzyści EnergyLogserver:</h4>
+                        <ul id="additionalBenefits">
+                            <!-- Będzie wypełniane dynamicznie -->
+                        </ul>
+                    </div>
+                    
+                    <div class="roi-actions">
+                        <button class="cta-button" onclick="exportROIReport()">
+                            📄 Eksportuj raport ROI do PDF
+                        </button>
+                        <button class="cta-button" onclick="emailROIReport()" style="background-color: #FFD700; color: #008000;">
+                            📧 Wyślij raport email
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <h2>9. Kontakt</h2>
+            <div class="contact-form">
+                <form id="contactForm">
+                    <label>Imię: <input type="text" name="name" required></label>
+                    <label>E-mail: <input type="email" name="email" required></label>
+                    <label>Wiadomość: <textarea name="message"></textarea></label>
+                    <button type="submit">Wyślij</button>
+                </form>
+            </div>
+
+            <h2>10. Eksport do PDF</h2>
+            <button class="cta-button" onclick="exportToPDF()">Pobierz PDF</button>
+        </div>
+
+        <!-- Battlecard Techniczny -->
+        <div id="Techniczny" class="tabcontent">
+            <h2>1. Architektura Systemu</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorArchitecture">Porównaj z: </label>
+                <select id="vendorArchitecture" onchange="updateVendorTable('architectureTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="architectureTable">
+                <tr><th>Rozwiązanie</th><th>Architektura</th></tr>
+                <tr><td>EnergyLogserver</td><td>Elasticsearch, Logstash, Kibana + GUI, wsparcie UEBA</td></tr>
+                <tr><td>Splunk</td><td>Własny silnik, wymaga dodatków</td></tr>
+                <tr><td>QRadar</td><td>Architektura z AI Watson</td></tr>
+                <tr><td>Sentinel</td><td>Chmurowy, Azure Log Analytics</td></tr>
+                <tr><td>FortiSIEM</td><td>Multi-tenant z kolektorami</td></tr>
+                <tr><td>SecureVisio</td><td>Polski SIEM, compliance</td></tr>
+            </table>
+
+            <h2>2. Kluczowe Przewagi</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorTechnical">Porównaj z: </label>
+                <select id="vendorTechnical" onchange="updateVendorTable('technicalTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <div class="filter pdf-interactive">
+                <label><input type="checkbox" checked onchange="filterTable('technicalTable', this)"> Pokaż wszystko</label>
+                <label><input type="checkbox" onchange="filterTable('technicalTable', this, 1)"> Parsing Out-of-Box</label>
+                <label><input type="checkbox" onchange="filterTable('technicalTable', this, 7)"> SOAR</label>
+            </div>
+            <div class="search pdf-interactive">
+                <input type="text" id="technicalSearch" placeholder="Wyszukaj..." onkeyup="searchTable('technicalTable', this.value)">
+            </div>
+            <table id="technicalTable">
+                <tr><th>Cecha</th><th>EnergyLogserver</th><th>Splunk</th><th>QRadar</th><th>Sentinel</th><th>FortiSIEM</th><th>SecureVisio</th></tr>
+                <tr><td>Parsing Out-of-Box</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Dashboardy</td><td>Tak</td><td>Add-ons</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Alerting</td><td>Tak</td><td>Tak (premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>MITRE ATT&CK</td><td>Tak</td><td>Tak (premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Playbooki</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak (SOAR)</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Netflow</td><td>Tak</td><td>Tak (add-on)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Natywna Integracja SOAR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>UEBA</td><td>Tak</td><td>Tak (premium)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>XDR</td><td>Tak</td><td>Nie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Nie</td></tr>
+                <tr><td>Raportowanie</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Płatne</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Otwarty Interfejs</td><td>Tak</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Nie</td><td>Tak</td></tr>
+                <tr><td>Wieloplatformowość</td><td>Win/Linux/Chmura</td><td>Win/Linux/Chmura</td><td>Win/Linux/Chmura</td><td>Azure</td><td>Win/Linux/Chmura</td><td>Win/Linux</td></tr>
+                <tr><td>Czas Wdrożenia</td><td>1-2 dni</td><td>5-10 dni</td><td>3-7 dni</td><td>1-3 dni</td><td>3-5 dni</td><td>1-2 dni</td></tr>
+                <tr><td>Chmura Hybrydowa</td><td>Tak</td><td>Tak (złożone)</td><td>Tak</td><td>Tak</td><td>Tak</td><td>Tak</td></tr>
+                <tr><td>Źródła Danych</td><td>100+</td><td>500+</td><td>450+</td><td>200+</td><td>400+</td><td>150+</td></tr>
+            </table>
+
+            <h2>3. Wymagania i Skalowalność</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorRequirements">Porównaj z: </label>
+                <select id="vendorRequirements" onchange="updateVendorTable('requirementsTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="requirementsTable">
+                <tr><th>Rozwiązanie</th><th>Wymagania Min.</th><th>Skalowalność</th><th>Ograniczenia Wydajnościowe</th></tr>
+                <tr><td>EnergyLogserver</td><td>8 CPU, 16 GB RAM</td><td>Klaster Elasticsearch</td><td>Brak limitu EPS</td></tr>
+                <tr><td>Splunk</td><td>16 CPU, 32 GB RAM</td><td>Licencja GB/dzień</td><td>Limit GB/dzień</td></tr>
+                <tr><td>QRadar</td><td>16 CPU, 64 GB RAM</td><td>Dedykowane HA</td><td>Wysokie zużycie zasobów</td></tr>
+                <tr><td>Sentinel</td><td>Chmura Azure</td><td>Elastyczna</td><td>Zależna od Azure</td></tr>
+                <tr><td>FortiSIEM</td><td>12 CPU, 24 GB RAM</td><td>Multi-tenant</td><td>~50k EPS/kolektor</td></tr>
+                <tr><td>SecureVisio</td><td>8 CPU, 16 GB RAM</td><td>Klaster</td><td>~30k EPS</td></tr>
+            </table>
+
+            <h2>4. Integracje z Ekosystemem</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorIntegrations">Porównaj z: </label>
+                <select id="vendorIntegrations" onchange="updateVendorTable('integrationsTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="integrationsTable">
+                <tr><th>Rozwiązanie</th><th>Integracje</th></tr>
+                <tr><td>EnergyLogserver</td><td>SOAR, XDR, UEBA, chmura hybrydowa</td></tr>
+                <tr><td>Splunk</td><td>Wymaga SOAR/ES App</td></tr>
+                <tr><td>QRadar</td><td>IBM X-Force, SOAR, XDR</td></tr>
+                <tr><td>Sentinel</td><td>SOAR, XDR via Defender</td></tr>
+                <tr><td>FortiSIEM</td><td>SOAR, XDR, UEBA Fortinet</td></tr>
+                <tr><td>SecureVisio</td><td>SOAR, UEBA lokalne</td></tr>
+            </table>
+
+            <h2>5. Integracje Threat Intelligence</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorThreat">Porównaj z: </label>
+                <select id="vendorThreat" onchange="updateVendorTable('threatTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="threatTable">
+                <tr><th>Rozwiązanie</th><th>Threat Intelligence</th></tr>
+                <tr><td>EnergyLogserver</td><td>MISP + Energy Feeds (150+)</td></tr>
+                <tr><td>Splunk</td><td>Paid Add-ons</td></tr>
+                <tr><td>QRadar</td><td>IBM X-Force</td></tr>
+                <tr><td>Sentinel</td><td>Microsoft TI</td></tr>
+                <tr><td>FortiSIEM</td><td>FortiGuard</td></tr>
+                <tr><td>SecureVisio</td><td>Lokalne + komercyjne</td></tr>
+            </table>
+
+            <h2>6. API i Rozszerzalność</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorApi">Porównaj z: </label>
+                <select id="vendorApi" onchange="updateVendorTable('apiTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="apiTable">
+                <tr><th>Rozwiązanie</th><th>API i Rozszerzalność</th></tr>
+                <tr><td>EnergyLogserver</td><td>REST API, otwarty interfejs</td></tr>
+                <tr><td>Splunk</td><td>API, mniej elastyczne</td></tr>
+                <tr><td>QRadar</td><td>API, zamknięte</td></tr>
+                <tr><td>Sentinel</td><td>API Azure, zamknięte</td></tr>
+                <tr><td>FortiSIEM</td><td>API mniej elastyczne</td></tr>
+                <tr><td>SecureVisio</td><td>API lokalne</td></tr>
+            </table>
+
+            <h2>7. Benchmark Wydajnościowy</h2>
+            <div class="vendor-select pdf-interactive">
+                <label for="vendorBenchmark">Porównaj z: </label>
+                <select id="vendorBenchmark" onchange="updateVendorTable('benchmarkTable', this.value)">
+                    <option value="all">Wszyscy</option>
+                    <option value="Splunk">Splunk</option>
+                    <option value="QRadar">QRadar</option>
+                    <option value="Sentinel">Sentinel</option>
+                    <option value="FortiSIEM">FortiSIEM</option>
+                    <option value="SecureVisio">SecureVisio</option>
+                </select>
+            </div>
+            <table id="benchmarkTable">
+                <tr><th>Rozwiązanie</th><th>EPS</th><th>Opóźnienie</th><th>Zużycie RAM (10k EPS)</th></tr>
+                <tr><td>EnergyLogserver</td><td>100k</td><td><1s</td><td>8 GB</td></tr>
+                <tr><td>Splunk</td><td>50-100k</td><td>Zależy od sprzętu</td><td>32 GB</td></tr>
+                <tr><td>QRadar</td><td>~75k</td><td>~2s</td><td>64 GB</td></tr>
+                <tr><td>Sentinel</td><td>Zależne od Azure</td><td>Zależne od Azure</td><td>Zależne od Azure</td></tr>
+                <tr><td>FortiSIEM</td><td>50k</td><td><2s</td><td>24 GB</td></tr>
+                <tr><td>SecureVisio</td><td>30k</td><td><2s</td><td>16 GB</td></tr>
+            </table>
+
+            <h2>8. Kontakt</h2>
+            <div class="contact-form">
+                <form id="contactFormTech">
+                    <label>Imię: <input type="text" name="name" required></label>
+                    <label>E-mail: <input type="email" name="email" required></label>
+                    <label>Wiadomość: <textarea name="message"></textarea></label>
+                    <button type="submit">Wyślij</button>
+                </form>
+            </div>
+
+            <h2>9. Eksport do PDF</h2>
+            <button class="cta-button" onclick="exportToPDF()">Pobierz PDF</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        let currentActiveTab = 'Marketing';
+
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.className += " active";
+            currentActiveTab = tabName;
+        }
+
+        function filterTable(tableId, checkbox, rowIndex = -1) {
+            var table = document.getElementById(tableId);
+            var rows = table.getElementsByTagName("tr");
+            var allChecked = document.querySelector('input[type="checkbox"]:checked') === null;
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                if (rowIndex === -1 || i === rowIndex) {
+                    if (checkbox.checked || allChecked) {
+                        row.classList.add('filtered');
+                        row.style.display = "";
+                        setTimeout(() => row.classList.remove('filtered'), 300);
+                    } else {
+                        row.classList.add('filtered');
+                        row.style.display = "none";
+                        setTimeout(() => row.classList.remove('filtered'), 300);
+                    }
+                }
+            }
+            updateVendorTable(tableId, document.getElementById('vendor' + tableId.replace('Table', '')).value);
+        }
+
+        function searchTable(tableId, searchTerm) {
+            var table = document.getElementById(tableId);
+            var rows = table.getElementsByTagName("tr");
+            searchTerm = searchTerm.toLowerCase();
+            for (var i = 1; i < rows.length; i++) {
+                var row = rows[i];
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? "" : "none";
+            }
+            updateVendorTable(tableId, document.getElementById('vendor' + tableId.replace('Table', '')).value);
+        }
+
+        function updateVendorTable(tableId, selectedVendor) {
+            var table = document.getElementById(tableId);
+            var headers = table.getElementsByTagName("th");
+            var rows = table.getElementsByTagName("tr");
+
+            if (selectedVendor === "all") {
+                for (var j = 0; j < headers.length; j++) {
+                    headers[j].style.display = "";
+                }
+                for (var i = 1; i < rows.length; i++) {
+                    var cells = rows[i].getElementsByTagName("td");
+                    for (var j = 0; j < cells.length; j++) {
+                        cells[j].style.display = "";
+                    }
+                }
+            } else {
+                var vendorIndex = -1;
+                for (var i = 0; i < headers.length; i++) {
+                    if (headers[i].textContent === selectedVendor) {
+                        vendorIndex = i;
+                        break;
+                    }
+                }
+
+                for (var j = 0; j < headers.length; j++) {
+                    headers[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                }
+
+                for (var i = 1; i < rows.length; i++) {
+                    var cells = rows[i].getElementsByTagName("td");
+                    for (var j = 0; j < cells.length; j++) {
+                        cells[j].style.display = (j === 0 || j === 1 || j === vendorIndex) ? "" : "none";
+                    }
+                }
+            }
+        }
+
+        function calculateROI() {
+            const form = document.getElementById('roiForm');
+            const formData = new FormData(form);
+            
+            const currentSolution = formData.get('currentSolution');
+            const companySize = formData.get('companySize');
+            const eventsPerDay = parseInt(formData.get('eventsPerDay')) || 0;
+            const currentCost = parseInt(formData.get('currentCost')) || 0;
+            const itStaff = parseInt(formData.get('itStaff')) || 1;
+            const industry = formData.get('industry');
+
+            if (!currentSolution || !companySize || !eventsPerDay) {
+                alert('Proszę wypełnić wszystkie wymagane pola.');
+                return;
+            }
+
+            const costs = calculateCosts(currentSolution, companySize, eventsPerDay, currentCost, itStaff, industry);
+            displayROIResults(costs);
+            document.getElementById('roiResults').style.display = 'block';
+            document.getElementById('roiResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function calculateCosts(currentSolution, companySize, eventsPerDay, currentCost, itStaff, industry) {
+            const elsPricing = {
+                small: { license: 120000, implementation: 30000, support: 24000 },
+                medium: { license: 250000, implementation: 60000, support: 50000 },
+                large: { license: 450000, implementation: 120000, support: 90000 }
+            };
+
+            const competitorPricing = {
+                splunk: {
+                    small: { license: 300000, implementation: 80000, support: 60000 },
+                    medium: { license: 650000, implementation: 150000, support: 130000 },
+                    large: { license: 1200000, implementation: 300000, support: 240000 }
+                },
+                qradar: {
+                    small: { license: 200000, implementation: 70000, support: 40000 },
+                    medium: { license: 450000, implementation: 120000, support: 90000 },
+                    large: { license: 800000, implementation: 200000, support: 160000 }
+                },
+                sentinel: {
+                    small: { license: 180000, implementation: 40000, support: 35000 },
+                    medium: { license: 380000, implementation: 80000, support: 75000 },
+                    large: { license: 700000, implementation: 150000, support: 140000 }
+                },
+                fortisiem: {
+                    small: { license: 160000, implementation: 50000, support: 32000 },
+                    medium: { license: 320000, implementation: 90000, support: 64000 },
+                    large: { license: 600000, implementation: 160000, support: 120000 }
+                },
+                securevision: {
+                    small: { license: 140000, implementation: 35000, support: 28000 },
+                    medium: { license: 280000, implementation: 70000, support: 56000 },
+                    large: { license: 520000, implementation: 130000, support: 104000 }
+                },
+                custom: {
+                    small: { license: currentCost || 150000, implementation: 60000, support: 30000 },
+                    medium: { license: currentCost || 350000, implementation: 100000, support: 70000 },
+                    large: { license: currentCost || 650000, implementation: 180000, support: 130000 }
+                },
+                none: {
+                    small: { license: 0, implementation: 100000, support: 0 },
+                    medium: { license: 0, implementation: 200000, support: 0 },
+                    large: { license: 0, implementation: 400000, support: 0 }
+                }
+            };
+
+            const currentCosts = competitorPricing[currentSolution]?.[companySize] || competitorPricing.custom[companySize];
+            const elsCosts = elsPricing[companySize];
+
+            const staffCostPerYear = itStaff * 120000;
+            const currentOpCost = staffCostPerYear * 0.3;
+            const elsOpCost = staffCostPerYear * 0.15;
+
+            const industryMultipliers = {
+                finance: 1.2, healthcare: 1.15, government: 1.1, manufacturing: 1.0,
+                retail: 0.95, it: 0.9, other: 1.0
+            };
+            
+            const multiplier = industryMultipliers[industry] || 1.0;
+
+            const currentTotal3Year = {
+                license: (currentCosts.license * 3) * multiplier,
+                implementation: currentCosts.implementation * multiplier,
+                support: (currentCosts.support * 3) * multiplier,
+                operational: (currentOpCost * 3) * multiplier
+            };
+
+            const elsTotal3Year = {
+                license: (elsCosts.license * 3) * multiplier,
+                implementation: elsCosts.implementation * multiplier,
+                support: (elsCosts.support * 3) * multiplier,
+                operational: (elsOpCost * 3) * multiplier
+            };
+
+            const totalCurrentCost = Object.values(currentTotal3Year).reduce((a, b) => a + b, 0);
+            const totalElsCost = Object.values(elsTotal3Year).reduce((a, b) => a + b, 0);
+            const totalSavings = totalCurrentCost - totalElsCost;
+            const annualSavings = totalSavings / 3;
+            const roi = totalElsCost > 0 ? ((totalSavings / totalElsCost) * 100) : 0;
+            const paybackPeriod = annualSavings > 0 ? (totalElsCost / 3) / (annualSavings / 12) : 0;
+
+            return {
+                current: currentTotal3Year,
+                els: elsTotal3Year,
+                savings: { total: totalSavings, annual: annualSavings, roi: roi, paybackPeriod: paybackPeriod },
+                totals: { current: totalCurrentCost, els: totalElsCost }
+            };
+        }
+
+        function displayROIResults(costs) {
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('pl-PL', {
+                    style: 'currency', currency: 'PLN', minimumFractionDigits: 0, maximumFractionDigits: 0
+                }).format(amount);
+            };
+
+            document.getElementById('totalSavings').textContent = formatCurrency(costs.savings.annual);
+            document.getElementById('roiPercentage').textContent = Math.round(costs.savings.roi) + '%';
+            document.getElementById('paybackPeriod').textContent = Math.round(costs.savings.paybackPeriod) + ' miesięcy';
+
+            document.getElementById('currentLicenseCost').textContent = formatCurrency(costs.current.license / 3);
+            document.getElementById('elsLicenseCost').textContent = formatCurrency(costs.els.license / 3);
+            document.getElementById('licenseSavings').textContent = formatCurrency((costs.current.license - costs.els.license) / 3);
+
+            document.getElementById('currentImplementationCost').textContent = formatCurrency(costs.current.implementation);
+            document.getElementById('elsImplementationCost').textContent = formatCurrency(costs.els.implementation);
+            document.getElementById('implementationSavings').textContent = formatCurrency(costs.current.implementation - costs.els.implementation);
+
+            document.getElementById('currentSupportCost').textContent = formatCurrency(costs.current.support / 3);
+            document.getElementById('elsSupportCost').textContent = formatCurrency(costs.els.support / 3);
+            document.getElementById('supportSavings').textContent = formatCurrency((costs.current.support - costs.els.support) / 3);
+
+            document.getElementById('currentOperationalCost').textContent = formatCurrency(costs.current.operational / 3);
+            document.getElementById('elsOperationalCost').textContent = formatCurrency(costs.els.operational / 3);
+            document.getElementById('operationalSavings').textContent = formatCurrency((costs.current.operational - costs.els.operational) / 3);
+
+            document.getElementById('currentTotalCost').textContent = formatCurrency(costs.totals.current);
+            document.getElementById('elsTotalCost').textContent = formatCurrency(costs.totals.els);
+            document.getElementById('totalCostSavings').textContent = formatCurrency(costs.savings.total);
+
+            const savingsElements = ['licenseSavings', 'implementationSavings', 'supportSavings', 'operationalSavings', 'totalCostSavings'];
+            savingsElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element && !element.textContent.includes('-')) {
+                    element.classList.add('savings-positive');
+                }
+            });
+
+            const benefits = [
+                '✅ Dedykowane wsparcie w języku polskim (24/7)',
+                '✅ Szybsze wdrożenie (1-2 dni vs 5-10 dni)',
+                '✅ Niższe koszty operacyjne dzięki intuicyjnemu interfejsowi',
+                '✅ Brak ukrytych kosztów - wszystko w standardzie',
+                '✅ Lokalne wsparcie techniczne'
+            ];
+
+            if (costs.savings.roi > 50) {
+                benefits.push('🚀 Wysoki ROI - inwestycja zwraca się szybko');
+            }
+
+            if (costs.savings.paybackPeriod < 12) {
+                benefits.push('⚡ Szybki okres zwrotu - mniej niż rok');
+            }
+
+            document.getElementById('additionalBenefits').innerHTML = benefits.map(benefit => `<li>${benefit}</li>`).join('');
+
+            setTimeout(() => {
+                document.querySelectorAll('.roi-value').forEach(el => {
+                    el.classList.add('animate');
+                });
+            }, 100);
+        }
+
+        function exportROIReport() {
+            alert('Funkcja eksportu raportu ROI zostanie dodana do głównego eksportu PDF!');
+        }
+
+        function emailROIReport() {
+            const results = document.getElementById('roiResults');
+            if (results.style.display === 'none') {
+                alert('Najpierw oblicz ROI, aby wysłać raport.');
+                return;
+            }
+
+            const savings = document.getElementById('totalSavings').textContent;
+            const roi = document.getElementById('roiPercentage').textContent;
+            
+            const emailBody = `Cześć!
+
+Sprawdziłem kalkulator ROI dla EnergyLogserver i wyniki są bardzo interesujące:
+
+🔹 Roczne oszczędności: ${savings}
+🔹 ROI: ${roi}
+🔹 Pełne porównanie dostępne na: ${window.location.href}
+
+Czy możemy umówić się na prezentację rozwiązania?
+
+Pozdrawiam!`;
+
+            const mailtoLink = `mailto:?subject=Kalkulator ROI - EnergyLogserver SIEM&body=${encodeURIComponent(emailBody)}`;
+            window.open(mailtoLink);
+        }
+
+        function exportToPDF() {
+            if (typeof window.jspdf === 'undefined') {
+                alert('Biblioteka PDF nie jest jeszcze załadowana. Spróbuj ponownie za chwilę.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(20);
+            doc.text('EnergyLogserver Battlecard', 20, 20);
+            doc.setFontSize(12);
+            doc.text('Data: ' + new Date().toLocaleDateString(), 20, 40);
+            doc.text('Wygenerowano z: ' + window.location.href, 20, 60);
+            
+            doc.save('EnergyLogserver_Battlecard_' + new Date().toISOString().split('T')[0] + '.pdf');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("contactForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                alert("Wiadomość wysłana! Skontaktujemy się z Tobą wkrótce.\n\nKontakt: kontakt@energylogserver.com");
+            });
+            
+            document.getElementById("contactFormTech").addEventListener("submit", function(e) {
+                e.preventDefault();
+                alert("Wiadomość wysłana! Skontaktujemy się z Tobą wkrótce.\n\nKontakt: kontakt@energylogserver.com");
+            });
+
+            document.getElementById("defaultOpen").click();
+            
+            const tables = ['marketingTable', 'benefitsTable', 'reviewsTable', 'featuresTable', 
+                          'architectureTable', 'technicalTable', 'requirementsTable', 'integrationsTable', 
+                          'threatTable', 'apiTable', 'benchmarkTable'];
+            
+            tables.forEach(tableId => {
+                updateVendorTable(tableId, 'all');
+            });
+        });
+    </script> 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(24);
+                addSafeText('EnergyLogserver', pageWidth/2, 25, { align: 'center' });
+                
+                doc.setFontSize(16);
+                addSafeText('SIEM Battlecard', pageWidth/2, 40, { align: 'center' });
+                
+                doc.setFontSize(12);
+                addSafeText('Data: Luty 2025', pageWidth/2, 52, { align: 'center' });
+
+                yPos = 80;
+                
+                // Hasło firmowe
+                doc.setTextColor(0, 128, 0);
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(11);
+                const motto = '"Bezpieczenstwo na wyciagniecie reki - elastyczne, skalowalne, wspierane lokalnie."';
+                addSafeText(motto, pageWidth/2, yPos, { align: 'center' });
+                
+                yPos += 30;
+
+                // === SEKCJA MARKETINGOWA ===
+                addHeader('BATTLECARD MARKETINGOWY', 16);
+                
+                addHeader('1. Opis Rozwiazania', 12);
+                addParagraph('EnergyLogserver to nowoczesny SIEM laczacy analize zagrozen w czasie rzeczywistym, intuicyjne dashboardy i pelne wsparcie techniczne w jezyku polskim. Idealny dla firm kazdej wielkosci, oferujacy niskie TCO, szybkie wdrozenie oraz zaawansowana automatyzacje dzieki natywnej integracji z SOAR, XDR i UEBA.');
+
+                addHeader('2. Pozycjonowanie Rynkowe', 12);
+                addParagraph('Dla kogo: Male i srednie przedsiebiorstwa (MSP), sektor finansowy, przemyslowy, administracja publiczna.');
+                addParagraph('Klienci: Lokalne banki, firmy produkcyjne, dostawcy uslug IT.');
+                addParagraph('Konkurencja: EnergyLogserver rosnie w Polsce dzieki lokalnemu wsparciu, nizszym kosztom i elastycznosci.');
+
+                // Dodaj tabele z danymi
+                const tables = [
+                    { id: 'marketingTable', title: '3. Kluczowe Przewagi' },
+                    { id: 'benefitsTable', title: '4. Kluczowe Korzysci Biznesowe' },
+                    { id: 'reviewsTable', title: '5. Opinie Uzytkownikow' },
+                    { id: 'featuresTable', title: '6. Unikalne Funkcjonalnosci' }
+                ];
+
+                tables.forEach(table => {
+                    const tableData = getTableData(table.id);
+                    if (tableData) {
+                        drawTable(tableData, table.title);
+                    }
+                });
+
+                // Case Studies
+                addHeader('7. Case Study', 12);
+                
+                addHeader('Polska Firma Finansowa', 10, false);
+                addParagraph('W duzej polskiej firmie finansowej wdrozenie EnergyLogserver pozwolilo na redukcje czasu detekcji zagrozen o 50% dzieki natywnej integracji z SOAR. Automatyzacja procesow reagowania na incydenty skrocila czas reakcji z godzin do minut.');
+                addParagraph('Korzysc: Lepsza ochrona danych klientow i zgodnosc z regulacjami GDPR.');
+
+                addHeader('Producent Przemyslowy', 10, false);
+                addParagraph('Miedzynarodowy producent przemyslowy wykorzystal EnergyLogserver do wykrycia anomalii w swojej infrastrukturze dzieki XDR. System zidentyfikowal potencjalny atak ransomware w czasie rzeczywistym.');
+                addParagraph('Korzysc: Ochrona ciaglosci produkcji i oszczednosc kosztow zwiazanych z przestojami.');
+
+                // === SEKCJA TECHNICZNA ===
+                doc.addPage();
+                yPos = margin;
+                
+                addHeader('BATTLECARD TECHNICZNY', 16);
+
+                // Tabele techniczne
+                const technicalTables = [
+                    { id: 'architectureTable', title: '1. Architektura Systemu' },
+                    { id: 'technicalTable', title: '2. Kluczowe Przewagi Techniczne' },
+                    { id: 'requirementsTable', title: '3. Wymagania i Skalowalnosc' },
+                    { id: 'integrationsTable', title: '4. Integracje z Ekosystemem' },
+                    { id: 'threatTable', title: '5. Threat Intelligence' },
+                    { id: 'apiTable', title: '6. API i Rozszerzalnosc' },
+                    { id: 'benchmarkTable', title: '7. Benchmark Wydajnosciowy' }
+                ];
+
+                technicalTables.forEach(table => {
+                    const tableData = getTableData(table.id);
+                    if (tableData) {
+                        drawTable(tableData, table.title);
+                    }
+                });
+
+                // Kontakt
+                checkNewPage(40);
+                addHeader('Kontakt', 12);
+                addParagraph('EnergyLogserver Sp. z o.o.');
+                addParagraph('E-mail: kontakt@energylogserver.com');
+                addParagraph('Telefon: +48 XXX XXX XXX');
+                addParagraph('Strona: www.energylogserver.com');
+
+                // Dodaj stopki na wszystkich stronach
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(128, 128, 128);
+                    doc.setFont('helvetica', 'normal');
+                    addSafeText(`Strona ${i} z ${totalPages}`, pageWidth - margin, pageHeight - 8, { align: 'right' });
+                    addSafeText('EnergyLogserver SIEM (c) 2025', margin, pageHeight - 8);
+                }
+
+                // Usuń komunikat ładowania
+                setTimeout(() => {
+                    if (loadingDiv.parentNode) {
+                        document.body.removeChild(loadingDiv);
+                    }
+                }, 300);
+
+                // Zapisz PDF z lepszą nazwą
+                const today = new Date();
+                const dateStr = today.getFullYear() + '-' + 
+                              String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(today.getDate()).padStart(2, '0');
+                doc.save(`EnergyLogserver_Battlecard_${dateStr}.pdf`);
+                
+                console.log('PDF wygenerowany pomyślnie');
+
+            } catch (error) {
+                console.error('Błąd generowania PDF:', error);
+                alert('Wystąpił błąd podczas generowania PDF: ' + error.message);
+                
+                // Usuń komunikat ładowania w przypadku błędu
+                const loadingDiv = document.querySelector('div[style*="position: fixed"]');
+                if (loadingDiv && loadingDiv.parentNode) {
+                    loadingDiv.parentNode.removeChild(loadingDiv);
+                }
+            }
+        }
+
+            } catch (error) {
+                console.error('Błąd generowania PDF:', error);
+                alert('Wystąpił błąd podczas generowania PDF: ' + error.message);
+                
+                // Usuń komunikat ładowania w przypadku błędu
+                const loadingDiv = document.querySelector('div[style*="position: fixed"]');
+                if (loadingDiv && loadingDiv.parentNode) {
+                    loadingDiv.parentNode.removeChild(loadingDiv);
+                }
+            }
+        }
+
+        // Obsługa formularzy kontaktowych
+        document.getElementById("contactForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            alert("Wiadomość wysłana! Skontaktujemy się z Tobą wkrótce.\n\nKontakt: kontakt@energylogserver.com");
+        });
+        
+        document.getElementById("contactFormTech").addEventListener("submit", function(e) {
+            e.preventDefault();
+            alert("Wiadomość wysłana! Skontaktujemy się z Tobą wkrótce.\n\nKontakt: kontakt@energylogserver.com");
+        });
+
+        // Inicjalizacja
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("defaultOpen").click();
+            
+            // Inicjalne ustawienie tabel
+            const tables = ['marketingTable', 'benefitsTable', 'reviewsTable', 'featuresTable', 
+                          'architectureTable', 'technicalTable', 'requirementsTable', 'integrationsTable', 
+                          'threatTable', 'apiTable', 'benchmarkTable'];
+            
+            tables.forEach(tableId => {
+                updateVendorTable(tableId, 'all');
+            });
+        });
+
+        // Sprawdź załadowanie bibliotek
+        function checkLibraries() {
+            if (typeof window.jspdf === 'undefined') {
+                console.log('jsPDF nie jest jeszcze załadowane');
+                setTimeout(checkLibraries, 1000);
+            } else {
+                console.log('Biblioteka PDF jest załadowana');
+            }
+        }
+        // ROI Calculator Functions
+        function calculateROI() {
+            const form = document.getElementById('roiForm');
+            const formData = new FormData(form);
+            
+            const currentSolution = formData.get('currentSolution');
+            const companySize = formData.get('companySize');
+            const eventsPerDay = parseInt(formData.get('eventsPerDay')) || 0;
+            const currentCost = parseInt(formData.get('currentCost')) || 0;
+            const itStaff = parseInt(formData.get('itStaff')) || 1;
+            const industry = formData.get('industry');
+
+            // Validate required fields
+            if (!currentSolution || !companySize || !eventsPerDay) {
+                alert('Proszę wypełnić wszystkie wymagane pola.');
+                return;
+            }
+
+            // Cost calculation logic
+            const costs = calculateCosts(currentSolution, companySize, eventsPerDay, currentCost, itStaff, industry);
+            
+            // Display results
+            displayROIResults(costs);
+            
+            // Show results section
+            document.getElementById('roiResults').style.display = 'block';
+            document.getElementById('roiResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function calculateCosts(currentSolution, companySize, eventsPerDay, currentCost, itStaff, industry) {
+            // EnergyLogserver pricing model
+            const elsPricing = {
+                small: { license: 120000, implementation: 30000, support: 24000 },
+                medium: { license: 250000, implementation: 60000, support: 50000 },
+                large: { license: 450000, implementation: 120000, support: 90000 }
+            };
+
+            // Competitor pricing estimates (annual)
+            const competitorPricing = {
+                splunk: {
+                    small: { license: 300000, implementation: 80000, support: 60000 },
+                    medium: { license: 650000, implementation: 150000, support: 130000 },
+                    large: { license: 1200000, implementation: 300000, support: 240000 }
+                },
+                qradar: {
+                    small: { license: 200000, implementation: 70000, support: 40000 },
+                    medium: { license: 450000, implementation: 120000, support: 90000 },
+                    large: { license: 800000, implementation: 200000, support: 160000 }
+                },
+                sentinel: {
+                    small: { license: 180000, implementation: 40000, support: 35000 },
+                    medium: { license: 380000, implementation: 80000, support: 75000 },
+                    large: { license: 700000, implementation: 150000, support: 140000 }
+                },
+                fortisiem: {
+                    small: { license: 160000, implementation: 50000, support: 32000 },
+                    medium: { license: 320000, implementation: 90000, support: 64000 },
+                    large: { license: 600000, implementation: 160000, support: 120000 }
+                },
+                securevision: {
+                    small: { license: 140000, implementation: 35000, support: 28000 },
+                    medium: { license: 280000, implementation: 70000, support: 56000 },
+                    large: { license: 520000, implementation: 130000, support: 104000 }
+                },
+                custom: {
+                    small: { license: currentCost || 150000, implementation: 60000, support: 30000 },
+                    medium: { license: currentCost || 350000, implementation: 100000, support: 70000 },
+                    large: { license: currentCost || 650000, implementation: 180000, support: 130000 }
+                },
+                none: {
+                    small: { license: 0, implementation: 100000, support: 0 },
+                    medium: { license: 0, implementation: 200000, support: 0 },
+                    large: { license: 0, implementation: 400000, support: 0 }
+                }
+            };
+
+            // Get costs for current solution
+            const currentCosts = competitorPricing[currentSolution]?.[companySize] || 
+                               competitorPricing.custom[companySize];
+            const elsCosts = elsPricing[companySize];
+
+            // Operational costs (staff time, training, etc.)
+            const staffCostPerYear = itStaff * 120000; // Average IT security salary
+            const currentOpCost = staffCostPerYear * 0.3; // 30% time on SIEM management
+            const elsOpCost = staffCostPerYear * 0.15; // ELS reduces management overhead
+
+            // Industry-specific adjustments
+            const industryMultipliers = {
+                finance: 1.2,
+                healthcare: 1.15,
+                government: 1.1,
+                manufacturing: 1.0,
+                retail: 0.95,
+                it: 0.9,
+                other: 1.0
+            };
+            
+            const multiplier = industryMultipliers[industry] || 1.0;
+
+            // Calculate 3-year TCO
+            const currentTotal3Year = {
+                license: (currentCosts.license * 3) * multiplier,
+                implementation: currentCosts.implementation * multiplier,
+                support: (currentCosts.support * 3) * multiplier,
+                operational: (currentOpCost * 3) * multiplier
+            };
+
+            const elsTotal3Year = {
+                license: (elsCosts.license * 3) * multiplier,
+                implementation: elsCosts.implementation * multiplier,
+                support: (elsCosts.support * 3) * multiplier,
+                operational: (elsOpCost * 3) * multiplier
+            };
+
+            // Calculate savings
+            const totalCurrentCost = Object.values(currentTotal3Year).reduce((a, b) => a + b, 0);
+            const totalElsCost = Object.values(elsTotal3Year).reduce((a, b) => a + b, 0);
+            const totalSavings = totalCurrentCost - totalElsCost;
+            const annualSavings = totalSavings / 3;
+            const roi = totalElsCost > 0 ? ((totalSavings / totalElsCost) * 100) : 0;
+            const paybackPeriod = annualSavings > 0 ? (totalElsCost / 3) / (annualSavings / 12) : 0;
+
+            return {
+                current: currentTotal3Year,
+                els: elsTotal3Year,
+                savings: {
+                    total: totalSavings,
+                    annual: annualSavings,
+                    roi: roi,
+                    paybackPeriod: paybackPeriod
+                },
+                totals: {
+                    current: totalCurrentCost,
+                    els: totalElsCost
+                }
+            };
+        }
+
+        function displayROIResults(costs) {
+            // Format currency
+            const formatCurrency = (amount) => {
+                return new Intl.NumberFormat('pl-PL', {
+                    style: 'currency',
+                    currency: 'PLN',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(amount);
+            };
+
+            // Update summary metrics
+            document.getElementById('totalSavings').textContent = formatCurrency(costs.savings.annual);
+            document.getElementById('roiPercentage').textContent = Math.round(costs.savings.roi) + '%';
+            document.getElementById('paybackPeriod').textContent = Math.round(costs.savings.paybackPeriod) + ' miesięcy';
+
+            // Update breakdown table
+            document.getElementById('currentLicenseCost').textContent = formatCurrency(costs.current.license / 3);
+            document.getElementById('elsLicenseCost').textContent = formatCurrency(costs.els.license / 3);
+            document.getElementById('licenseSavings').textContent = formatCurrency((costs.current.license - costs.els.license) / 3);
+
+            document.getElementById('currentImplementationCost').textContent = formatCurrency(costs.current.implementation);
+            document.getElementById('elsImplementationCost').textContent = formatCurrency(costs.els.implementation);
+            document.getElementById('implementationSavings').textContent = formatCurrency(costs.current.implementation - costs.els.implementation);
+
+            document.getElementById('currentSupportCost').textContent = formatCurrency(costs.current.support / 3);
+            document.getElementById('elsSupportCost').textContent = formatCurrency(costs.els.support / 3);
+            document.getElementById('supportSavings').textContent = formatCurrency((costs.current.support - costs.els.support) / 3);
+
+            document.getElementById('currentOperationalCost').textContent = formatCurrency(costs.current.operational / 3);
+            document.getElementById('elsOperationalCost').textContent = formatCurrency(costs.els.operational / 3);
+            document.getElementById('operationalSavings').textContent = formatCurrency((costs.current.operational - costs.els.operational) / 3);
+
+            document.getElementById('currentTotalCost').textContent = formatCurrency(costs.totals.current);
+            document.getElementById('elsTotalCost').textContent = formatCurrency(costs.totals.els);
+            document.getElementById('totalCostSavings').textContent = formatCurrency(costs.savings.total);
+
+            // Add CSS class for positive savings
+            const savingsElements = ['licenseSavings', 'implementationSavings', 'supportSavings', 'operationalSavings', 'totalCostSavings'];
+            savingsElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element && !element.textContent.includes('-')) {
+                    element.classList.add('savings-positive');
+                }
+            });
+
+            // Update benefits based on calculation
+            const benefits = [
+                '✅ Dedykowane wsparcie w języku polskim (24/7)',
+                '✅ Szybsze wdrożenie (1-2 dni vs 5-10 dni)',
+                '✅ Niższe koszty operacyjne dzięki intuicyjnemu interfejsowi',
+                '✅ Brak ukrytych kosztów - wszystko w standardzie',
+                '✅ Lokalne wsparcie techniczne'
+            ];
+
+            if (costs.savings.roi > 50) {
+                benefits.push('🚀 Wysoki ROI - inwestycja zwraca się szybko');
+            }
+
+            if (costs.savings.paybackPeriod < 12) {
+                benefits.push('⚡ Szybki okres zwrotu - mniej niż rok');
+            }
+
+            const benefitsList = document.getElementById('additionalBenefits');
+            benefitsList.innerHTML = benefits.map(benefit => `<li>${benefit}</li>`).join('');
+
+            // Add animation to metrics
+            setTimeout(() => {
+                document.querySelectorAll('.roi-value').forEach(el => {
+                    el.classList.add('animate');
+                });
+            }, 100);
+        }
+
+        function exportROIReport() {
+            // This will extend the existing PDF export to include ROI data
+            alert('Funkcja eksportu raportu ROI zostanie dodana do głównego eksportu PDF!');
+        }
+
+        function emailROIReport() {
+            const results = document.getElementById('roiResults');
+            if (results.style.display === 'none') {
+                alert('Najpierw oblicz ROI, aby wysłać raport.');
+                return;
+            }
+
+            const savings = document.getElementById('totalSavings').textContent;
+            const roi = document.getElementById('roiPercentage').textContent;
+            
+            const emailBody = `Cześć!
+
+Sprawdziłem kalkulator ROI dla EnergyLogserver i wyniki są bardzo interesujące:
+
+🔹 Roczne oszczędności: ${savings}
+🔹 ROI: ${roi}
+🔹 Pełne porównanie dostępne na: ${window.location.href}
+
+Czy możemy umówić się na prezentację rozwiązania?
+
+Pozdrawiam!`;
+
+            const mailtoLink = `mailto:?subject=Kalkulator ROI - EnergyLogserver SIEM&body=${encodeURIComponent(emailBody)}`;
+            window.open(mailtoLink);
+        }
+
+        // Sprawdź załadowanie bibliotek
+        function checkLibraries() {
+            if (typeof window.jspdf === 'undefined') {
+                console.log('jsPDF nie jest jeszcze załadowane');
+                setTimeout(checkLibraries, 1000);
+            } else {
+                console.log('Biblioteka PDF jest załadowana');
+            }
+        }
+        checkLibraries();
+    </script>
+</body>
+</html>
